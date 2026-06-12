@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет | Тёплый Хлеб</title>
+  <script src="../redirect-to-server.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="admin-body">
+  <main>
+    <section class="login-screen" data-login-screen>
+      <form class="login-card" data-login-form>
+        <a class="logo" href="../index.html" aria-label="Тёплый Хлеб — на главную">
+          <span class="logo-mark" aria-hidden="true">ТХ</span>
+          <span class="logo-copy">
+            <strong>Тёплый Хлеб</strong>
+            <small>кабинет владельца</small>
+          </span>
+        </a>
+        <div>
+          <p class="eyebrow">Личный кабинет</p>
+          <h1>Вход владельца</h1>
+          <p>Управляйте сегодняшними остатками и ассортиментом.</p>
+        </div>
+        <label class="form-field">
+          <span>Логин</span>
+          <input type="text" name="username" autocomplete="username" required>
+        </label>
+        <label class="form-field">
+          <span>Пароль</span>
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        <button class="button" type="submit">Войти</button>
+        <p class="form-message" data-login-message aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="admin-app" data-admin-app hidden>
+      <aside class="admin-rail">
+        <a class="logo logo--inverse" href="../index.html" aria-label="Тёплый Хлеб — на главную">
+          <span class="logo-mark" aria-hidden="true">ТХ</span>
+          <span class="logo-copy">
+            <strong>Тёплый Хлеб</strong>
+            <small>кабинет владельца</small>
+          </span>
+        </a>
+        <nav class="admin-nav" aria-label="Разделы кабинета">
+          <a href="#overview">Обзор</a>
+          <a href="#orders">Заказы</a>
+          <a href="#products">Товары</a>
+        </nav>
+        <p class="admin-rail__note">Изменения сразу появляются на публичной витрине.</p>
+      </aside>
+
+      <div class="admin-workspace">
+      <header class="admin-header">
+        <div>
+          <p class="eyebrow">Рабочее пространство</p>
+          <h1>Кабинет владельца</h1>
+        </div>
+        <div class="admin-header__actions">
+          <a class="button button-light" href="../menu.html">Открыть витрину</a>
+          <button class="button button-light" type="button" data-open-password-modal>Пароль</button>
+          <button class="button button-secondary" type="button" data-logout>Выйти</button>
+        </div>
+      </header>
+
+      <div class="admin-layout">
+        <section class="admin-summary" id="overview">
+          <div>
+            <p class="eyebrow">Сегодня</p>
+            <h1>Товары и остатки</h1>
+            <p>Изменения сохраняются сразу и появляются на витрине без перезагрузки в другой открытой вкладке.</p>
+          </div>
+          <div class="summary-cards">
+            <article>
+              <span>Позиций</span>
+              <strong data-total-products>0</strong>
+            </article>
+            <article>
+              <span>Единиц в наличии</span>
+              <strong data-total-stock>0</strong>
+            </article>
+            <article>
+              <span>Закончились</span>
+              <strong data-out-of-stock>0</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="admin-orders-section" id="orders">
+          <div class="admin-toolbar">
+            <div>
+              <p class="eyebrow">Самовывоз</p>
+              <h2>Заказы покупателей</h2>
+              <p>Покупатель оплачивает заказ наличными или картой при получении в пекарне.</p>
+            </div>
+          </div>
+          <div class="orders-tabs" role="tablist" aria-label="Разделы заказов">
+            <button class="orders-tab is-active" type="button" data-orders-view="active" aria-pressed="true">
+              Активные <span data-active-orders-count>0</span>
+            </button>
+            <button class="orders-tab" type="button" data-orders-view="history" aria-pressed="false">
+              История заказов <span data-history-orders-count>0</span>
+            </button>
+          </div>
+          <div class="admin-orders" data-admin-orders>
+            <p class="loading-state">Загружаем заказы...</p>
+          </div>
+        </section>
+
+        <section class="admin-toolbar" id="products">
+          <div>
+            <h2>Ассортимент</h2>
+            <p>Перетаскивайте товары или используйте стрелки. Цена и остаток редактируются прямо в списке.</p>
+          </div>
+          <button class="button" type="button" data-add-product>Добавить товар</button>
+        </section>
+
+        <p class="form-message admin-notice" data-admin-message aria-live="polite"></p>
+        <div class="admin-products" data-admin-products></div>
+      </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" data-product-modal hidden>
+    <button class="modal-backdrop" type="button" data-close-modal aria-label="Закрыть"></button>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="product-form-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Карточка товара</p>
+          <h2 id="product-form-title" data-form-title>Новый товар</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-modal aria-label="Закрыть">×</button>
+      </div>
+
+      <form class="product-form" data-product-form>
+        <input type="hidden" name="id">
+        <label class="form-field form-field--wide">
+          <span>Название</span>
+          <input type="text" name="name" maxlength="80" required>
+        </label>
+        <label class="form-field">
+          <span>Категория</span>
+          <select name="category" required>
+            <option value="bread">Хлеб</option>
+            <option value="pastry">Выпечка</option>
+            <option value="drinks">Напитки</option>
+            <option value="desserts">Десерты</option>
+            <option value="other">Другое</option>
+          </select>
+        </label>
+        <label class="form-field">
+          <span>Цена, ₽</span>
+          <input type="number" name="price" min="0" step="1" required>
+        </label>
+        <label class="form-field">
+          <span>Количество</span>
+          <input type="number" name="stock" min="0" step="1" required>
+        </label>
+        <label class="form-field form-field--wide">
+          <span>Описание</span>
+          <textarea name="description" rows="4" maxlength="300" required></textarea>
+        </label>
+        <label class="form-field form-field--wide">
+          <span>Ссылка на фото или путь к файлу</span>
+          <input type="text" name="image" placeholder="assets/bakery-1.jfif">
+        </label>
+        <label class="form-field form-field--wide">
+          <span>Загрузить новое фото</span>
+          <input type="file" name="imageFile" accept="image/*">
+          <small>Для MVP фото сохраняется в браузере. Рекомендуемый размер файла — до 1 МБ.</small>
+        </label>
+        <div class="form-actions form-field--wide">
+          <button class="button button-secondary" type="button" data-close-modal>Отмена</button>
+          <button class="button" type="submit">Сохранить товар</button>
+        </div>
+        <p class="form-message form-field--wide" data-product-form-message aria-live="polite"></p>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal" data-password-modal hidden>
+    <button class="modal-backdrop" type="button" data-close-password-modal aria-label="Закрыть"></button>
+    <section class="modal-card password-modal-card" role="dialog" aria-modal="true" aria-labelledby="password-form-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Безопасность</p>
+          <h2 id="password-form-title">Сменить пароль</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-password-modal aria-label="Закрыть">×</button>
+      </div>
+      <form class="password-form" data-password-form>
+        <label class="form-field">
+          <span>Текущий пароль</span>
+          <input type="password" name="currentPassword" autocomplete="current-password" required>
+        </label>
+        <label class="form-field">
+          <span>Новый пароль</span>
+          <input type="password" name="newPassword" minlength="12" autocomplete="new-password" required>
+          <small>Не менее 12 символов.</small>
+        </label>
+        <label class="form-field">
+          <span>Повторите новый пароль</span>
+          <input type="password" name="confirmPassword" minlength="12" autocomplete="new-password" required>
+        </label>
+        <div class="form-actions">
+          <button class="button button-secondary" type="button" data-close-password-modal>Отмена</button>
+          <button class="button" type="submit">Сменить пароль</button>
+        </div>
+        <p class="form-message" data-password-message aria-live="polite"></p>
+      </form>
+    </section>
+  </div>
+
+  <script src="../product-store.js"></script>
+  <script src="../order-store.js"></script>
+  <script src="../auth.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

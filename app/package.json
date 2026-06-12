@@ -1,0 +1,19 @@
+{
+  "name": "teply-hleb-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Сайт пекарни с PostgreSQL, заказами и кабинетом владельца",
+  "scripts": {
+    "start": "node server.js",
+    "db:migrate": "node scripts/migrate-to-postgres.js",
+    "admin:password": "node scripts/set-admin-password.js",
+    "test": "node --test tests/server.test.js",
+    "check": "node --check server.js && node --check product-store.js && node --check auth.js && node --check catalog.js && node --check admin/admin.js"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

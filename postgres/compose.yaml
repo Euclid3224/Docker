@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-bookworm
+    container_name: bakery-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bakery
+      POSTGRES_USER: bakery_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - bakery_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bakery_user -d bakery"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  bakery_postgres_data:

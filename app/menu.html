@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Меню | Тёплый Хлеб</title>
+  <link rel="preload" as="image" href="assets/bakery-1.jfif" fetchpriority="high">
+  <script src="redirect-to-server.js"></script>
+  <link rel="stylesheet" href="style.css?v=20260612-cart-fixed-v3">
+</head>
+<body data-build="20260612-cart-fixed-v3">
+  <header class="site-header">
+    <a class="logo" href="index.html#hero" aria-label="Тёплый Хлеб — на главную">
+      <span class="logo-mark" aria-hidden="true">ТХ</span>
+      <span class="logo-copy">
+        <strong>Тёплый Хлеб</strong>
+        <small>пекарня рядом с домом</small>
+      </span>
+    </a>
+
+    <button class="menu-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="main-nav" id="main-nav" aria-label="Основная навигация">
+      <a href="index.html#about">О нас</a>
+      <a class="active" href="menu.html" aria-current="page">Меню</a>
+      <a href="index.html#gallery">Галерея</a>
+      <a href="index.html#contacts">Контакты</a>
+    </nav>
+  </header>
+
+  <main class="menu-page">
+    <section class="menu-hero">
+      <div class="hero-content">
+        <p class="eyebrow">Сегодня на витрине</p>
+        <h1>Свежие вкусы на каждый день</h1>
+        <p class="hero-text">Выбирайте хлеб, выпечку, напитки и десерты, которые мы готовим небольшими партиями к утренней и дневной витрине.</p>
+        <a class="button" href="#catalog">Смотреть ассортимент</a>
+      </div>
+    </section>
+
+    <section class="trust-strip trust-strip--menu" aria-label="Условия заказа">
+      <div class="trust-item">
+        <svg class="trust-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6.5 8.5h11l1 12h-13l1-12Z"></path>
+          <path d="M9 9V6.5a3 3 0 0 1 6 0V9"></path>
+        </svg>
+        <span class="trust-copy"><strong>Самовывоз</strong><span>готовим к вашему времени</span></span>
+      </div>
+      <div class="trust-item">
+        <svg class="trust-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <path d="M3 9h18"></path>
+        </svg>
+        <span class="trust-copy"><strong>Оплата при получении</strong><span>наличными или картой</span></span>
+      </div>
+      <div class="trust-item">
+        <svg class="trust-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 7v5l3 2"></path>
+        </svg>
+        <span class="trust-copy"><strong>08:00–20:00</strong><span>каждый день</span></span>
+      </div>
+    </section>
+
+    <section class="section menu-catalog" id="catalog" aria-labelledby="menu-title">
+      <div class="catalog-heading">
+        <div class="section-heading">
+          <p class="eyebrow">Ассортимент</p>
+          <h2 id="menu-title">Что приготовили сегодня</h2>
+          <p class="section-lead">Добавляйте товары в корзину и оформляйте самовывоз за несколько минут.</p>
+        </div>
+      </div>
+
+      <div class="catalog-controls">
+        <div class="menu-tabs" role="tablist" aria-label="Категории меню" data-category-tabs></div>
+        <div class="cart-toggle-slot" data-cart-toggle-slot>
+          <button class="cart-toggle" type="button" data-cart-toggle aria-controls="cart-drawer" aria-expanded="false">
+            Корзина <span data-cart-count>0</span>
+          </button>
+        </div>
+      </div>
+      <div class="product-catalog" data-product-catalog></div>
+      <p class="empty-state" data-empty-state hidden>В этой категории пока нет товаров.</p>
+    </section>
+  </main>
+
+  <aside class="cart-drawer" id="cart-drawer" data-cart-drawer role="dialog" aria-modal="true" aria-label="Корзина" aria-hidden="true" tabindex="-1" inert>
+    <div class="cart-header">
+      <div>
+        <p class="eyebrow">Ваш заказ</p>
+        <h2>Корзина</h2>
+      </div>
+      <button class="icon-button" type="button" data-cart-close aria-label="Закрыть корзину">×</button>
+    </div>
+    <div class="cart-items" data-cart-items></div>
+    <p class="empty-state" data-cart-empty>Корзина пока пуста.</p>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Итого</span>
+        <strong data-cart-total>0 ₽</strong>
+      </div>
+      <button class="button checkout-button" type="button" data-checkout disabled>Заказать</button>
+      <form class="pickup-order-form" data-order-form hidden>
+        <p class="pickup-note">Оплата при получении в пекарне: наличными или картой.</p>
+        <label class="form-field">
+          <span>Ваше имя</span>
+          <input type="text" name="name" maxlength="80" autocomplete="name" required>
+        </label>
+        <label class="form-field">
+          <span>Телефон</span>
+          <input type="tel" name="phone" maxlength="30" autocomplete="tel" placeholder="+7 900 000-00-00" required>
+        </label>
+        <label class="form-field">
+          <span>Когда планируете забрать</span>
+          <input type="text" name="pickupTime" maxlength="80" placeholder="Например, сегодня в 18:30">
+        </label>
+        <label class="form-field">
+          <span>Комментарий</span>
+          <textarea name="comment" rows="3" maxlength="300" placeholder="Необязательно"></textarea>
+        </label>
+        <div class="pickup-order-actions">
+          <button class="text-button" type="button" data-order-cancel>Назад</button>
+          <button class="button" type="submit">Подтвердить заказ</button>
+        </div>
+      </form>
+      <p class="form-message" data-checkout-message aria-live="polite"></p>
+    </div>
+  </aside>
+  <button class="drawer-backdrop" type="button" data-cart-backdrop aria-label="Закрыть корзину" hidden></button>
+
+  <footer class="site-footer">
+    <strong>Тёплый Хлеб</strong>
+    <p>© 2026. Свежая выпечка каждый день.</p>
+  </footer>
+
+  <script src="product-store.js"></script>
+  <script src="order-store.js"></script>
+  <script src="script.js"></script>
+  <script src="catalog.js?v=20260612-cart-fixed-v3"></script>
+</body>
+</html>

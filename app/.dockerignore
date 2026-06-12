@@ -1,0 +1,10 @@
+.env
+.git
+.gitignore
+node_modules
+npm-debug.log*
+server.stdout.log
+server.stderr.log
+tests
+data/orders.json
+data/users.json
