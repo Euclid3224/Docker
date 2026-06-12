@@ -265,15 +265,15 @@ test("frontend keeps public admin links hidden and uses local hero assets", asyn
   assert.match(menuHtml, /class="trust-strip trust-strip--menu"/);
   assert.match(menuHtml, /Свежие вкусы на каждый день/);
   assert.match(menuHtml, /class="trust-icon"/);
-  assert.match(menuHtml, /data-cart-toggle-slot/);
-  assert.match(menuHtml, /data-build="20260612-cart-fixed-v3"/);
-  assert.match(menuHtml, /catalog\.js\?v=20260612-cart-fixed-v3/);
+  assert.match(menuHtml, /data-cart-toggle-total/);
+  assert.match(menuHtml, /data-build="20260612-cart-dock-v4"/);
+  assert.match(menuHtml, /catalog\.js\?v=20260612-cart-dock-v4/);
   assert.match(adminHtml, /class="admin-rail"/);
   assert.match(catalogScript, /src="\$\{escapeHtml\(product\.image\)\}"/);
   assert.doesNotMatch(catalogScript, /updateFloatingCart/);
   assert.match(stylesheet, /min-height:\s*calc\(100svh - 73px\)/);
   assert.match(stylesheet, /height:\s*100dvh/);
-  assert.match(stylesheet, /On phones the cart always follows the buyer/);
+  assert.match(stylesheet, /Persistent cart dock/);
 });
 
 test("pickup order reserves stock and cancellation restores it", async (context) => {

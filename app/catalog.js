@@ -18,6 +18,7 @@
   const cartItems = document.querySelector("[data-cart-items]");
   const cartEmpty = document.querySelector("[data-cart-empty]");
   const cartTotal = document.querySelector("[data-cart-total]");
+  const cartToggleTotal = document.querySelector("[data-cart-toggle-total]");
   const cartCount = document.querySelector("[data-cart-count]");
   const checkoutButton = document.querySelector("[data-checkout]");
   const checkoutMessage = document.querySelector("[data-checkout-message]");
@@ -35,6 +36,7 @@
   let products = [];
   let activeCategory = "all";
   let cartReturnFocus = null;
+  const CART_STORAGE_KEY = "teply-hleb-cart";
   const cart = new Map();
   const focusableSelector = [
     "a[href]",
@@ -170,6 +172,33 @@
     });
   }
 
+  function restoreCart() {
+    try {
+      const savedCart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
+
+      if (!Array.isArray(savedCart)) {
+        return;
+      }
+
+      savedCart.forEach(([productId, quantity]) => {
+        const normalizedQuantity = Number(quantity);
+        if (typeof productId === "string" && Number.isInteger(normalizedQuantity)) {
+          cart.set(productId, normalizedQuantity);
+        }
+      });
+    } catch {
+      localStorage.removeItem(CART_STORAGE_KEY);
+    }
+  }
+
+  function saveCart() {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(Array.from(cart.entries())));
+    } catch {
+      // The cart still works when browser storage is unavailable.
+    }
+  }
+
   function renderCart() {
     reconcileCart();
     const lines = Array.from(cart.entries())
@@ -184,6 +213,13 @@
 
     cartCount.textContent = String(itemCount);
     cartTotal.textContent = formatPrice(total);
+    cartToggleTotal.textContent = formatPrice(total);
+    cartToggle.classList.toggle("has-items", itemCount > 0);
+    cartToggle.setAttribute(
+      "aria-label",
+      `Открыть корзину. Товаров: ${itemCount}. Сумма: ${formatPrice(total)}.`
+    );
+    saveCart();
     cartEmpty.hidden = lines.length > 0;
     checkoutButton.disabled = lines.length === 0;
     if (lines.length === 0) {
@@ -406,6 +442,7 @@
 
     try {
       products = await window.ProductStore.getAll();
+      restoreCart();
       render();
       window.ProductStore.subscribe((nextProducts) => {
         products = nextProducts;

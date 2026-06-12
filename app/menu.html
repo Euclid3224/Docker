@@ -6,9 +6,9 @@
   <title>Меню | Тёплый Хлеб</title>
   <link rel="preload" as="image" href="assets/bakery-1.jfif" fetchpriority="high">
   <script src="redirect-to-server.js"></script>
-  <link rel="stylesheet" href="style.css?v=20260612-cart-fixed-v3">
+  <link rel="stylesheet" href="style.css?v=20260612-cart-dock-v4">
 </head>
-<body data-build="20260612-cart-fixed-v3">
+<body class="menu-body" data-build="20260612-cart-dock-v4">
   <header class="site-header">
     <a class="logo" href="index.html#hero" aria-label="Тёплый Хлеб — на главную">
       <span class="logo-mark" aria-hidden="true">ТХ</span>
@@ -77,16 +77,24 @@
 
       <div class="catalog-controls">
         <div class="menu-tabs" role="tablist" aria-label="Категории меню" data-category-tabs></div>
-        <div class="cart-toggle-slot" data-cart-toggle-slot>
-          <button class="cart-toggle" type="button" data-cart-toggle aria-controls="cart-drawer" aria-expanded="false">
-            Корзина <span data-cart-count>0</span>
-          </button>
-        </div>
       </div>
       <div class="product-catalog" data-product-catalog></div>
       <p class="empty-state" data-empty-state hidden>В этой категории пока нет товаров.</p>
     </section>
   </main>
+
+  <button
+    class="cart-toggle"
+    type="button"
+    data-cart-toggle
+    aria-controls="cart-drawer"
+    aria-expanded="false"
+    aria-label="Открыть корзину. Товаров: 0. Сумма: 0 рублей."
+  >
+    <span class="cart-toggle__label">Корзина</span>
+    <strong class="cart-toggle__total" data-cart-toggle-total>0 ₽</strong>
+    <span class="cart-toggle__count" data-cart-count>0</span>
+  </button>
 
   <aside class="cart-drawer" id="cart-drawer" data-cart-drawer role="dialog" aria-modal="true" aria-label="Корзина" aria-hidden="true" tabindex="-1" inert>
     <div class="cart-header">
@@ -140,6 +148,6 @@
   <script src="product-store.js"></script>
   <script src="order-store.js"></script>
   <script src="script.js"></script>
-  <script src="catalog.js?v=20260612-cart-fixed-v3"></script>
+  <script src="catalog.js?v=20260612-cart-dock-v4"></script>
 </body>
 </html>
