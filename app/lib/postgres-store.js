@@ -5,10 +5,10 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 
 function createPostgresStore(options = {}) {
-  const { Pool } = require("pg");
-  const pool =
-    options.pool ||
-    new Pool({
+  let pool = options.pool;
+  if (!pool) {
+    const { Pool } = require("pg");
+    pool = new Pool({
       connectionString: options.connectionString || process.env.DATABASE_URL,
       ssl:
         process.env.DATABASE_SSL === "true"
@@ -16,6 +16,7 @@ function createPostgresStore(options = {}) {
           : undefined,
       max: Number(process.env.DATABASE_POOL_SIZE) || 10,
     });
+  }
 
   const productSelect = `
     SELECT id, category, name, description, image, price::float8 AS price, stock
@@ -427,6 +428,20 @@ function createPostgresStore(options = {}) {
     );
   }
 
+  async function updateUserPasswordAndDeleteSessions(userId, passwordHash) {
+    return withTransaction(async (client) => {
+      const result = await client.query(
+        "UPDATE users SET password_hash = $2, updated_at = NOW() WHERE id = $1",
+        [userId, passwordHash]
+      );
+      if (result.rowCount === 0) {
+        return false;
+      }
+      await client.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
+      return true;
+    });
+  }
+
   async function createSession(session) {
     await pool.query(
       `
@@ -477,29 +492,53 @@ function createPostgresStore(options = {}) {
     await pool.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
   }
 
-  async function recordLoginAttempt({ usernameNormalized, ipAddress, successful }) {
-    await pool.query(
-      `
-        INSERT INTO login_attempts (username_normalized, ip_address, successful)
-        VALUES ($1, $2, $3)
-      `,
-      [usernameNormalized, ipAddress, successful]
-    );
+  async function reserveLoginAttempt({
+    usernameNormalized,
+    ipAddress,
+    windowMinutes,
+    limit,
+  }) {
+    return withTransaction(async (client) => {
+      const lockKey = `login:${usernameNormalized}:${ipAddress}`;
+      await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [lockKey]);
+      await client.query(
+        "DELETE FROM login_attempts WHERE attempted_at < NOW() - INTERVAL '1 day'"
+      );
+
+      const { rows } = await client.query(
+        `
+          SELECT COUNT(*)::int AS count
+          FROM login_attempts
+          WHERE successful = FALSE
+            AND attempted_at > NOW() - ($3 * INTERVAL '1 minute')
+            AND username_normalized = $1
+            AND ip_address = $2
+        `,
+        [usernameNormalized, ipAddress, windowMinutes]
+      );
+      if (rows[0].count >= limit) {
+        return { allowed: false };
+      }
+
+      const { rows: insertedRows } = await client.query(
+        `
+          INSERT INTO login_attempts (username_normalized, ip_address, successful)
+          VALUES ($1, $2, FALSE)
+          RETURNING id
+        `,
+        [usernameNormalized, ipAddress]
+      );
+      return { allowed: true, attemptId: insertedRows[0].id };
+    });
   }
 
-  async function countRecentFailedLogins({ usernameNormalized, ipAddress, windowMinutes }) {
-    const { rows } = await pool.query(
-      `
-        SELECT COUNT(*)::int AS count
-        FROM login_attempts
-        WHERE successful = FALSE
-          AND attempted_at > NOW() - ($3 * INTERVAL '1 minute')
-          AND username_normalized = $1
-          AND ip_address = $2
-      `,
-      [usernameNormalized, ipAddress, windowMinutes]
-    );
-    return rows[0].count;
+  async function completeLoginAttempt({ attemptId, successful }) {
+    if (!successful) {
+      return;
+    }
+    await pool.query("UPDATE login_attempts SET successful = TRUE WHERE id = $1", [
+      attemptId,
+    ]);
   }
 
   async function recordOrderAttempt({ ipAddress, phoneNormalized }) {
@@ -621,12 +660,13 @@ function createPostgresStore(options = {}) {
     countUsers,
     createUser,
     updateUserPassword,
+    updateUserPasswordAndDeleteSessions,
     createSession,
     getSession,
     deleteSession,
     deleteUserSessions,
-    recordLoginAttempt,
-    countRecentFailedLogins,
+    reserveLoginAttempt,
+    completeLoginAttempt,
     recordOrderAttempt,
     countRecentOrders,
     importLegacyData,

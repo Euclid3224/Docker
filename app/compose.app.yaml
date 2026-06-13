@@ -7,13 +7,14 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      HOST: 0.0.0.0
       DATABASE_URL: postgresql://bakery_user:${POSTGRES_PASSWORD}@postgres:5432/bakery
       DATABASE_SSL: "false"
       DATABASE_POOL_SIZE: 10
       COOKIE_SECURE: "true"
       TRUST_PROXY: "true"
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     networks:
       - postgres
     healthcheck:

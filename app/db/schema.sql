@@ -75,6 +75,9 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 CREATE INDEX IF NOT EXISTS login_attempts_lookup_idx
   ON login_attempts (username_normalized, ip_address, attempted_at DESC);
 
+CREATE INDEX IF NOT EXISTS login_attempts_expiry_idx
+  ON login_attempts (attempted_at);
+
 CREATE TABLE IF NOT EXISTS order_attempts (
   id BIGSERIAL PRIMARY KEY,
   ip_address TEXT NOT NULL,

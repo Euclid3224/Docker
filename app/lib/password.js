@@ -11,6 +11,11 @@ const SCRYPT_OPTIONS = {
   p: 1,
   maxmem: 64 * 1024 * 1024,
 };
+const UNSAFE_PLACEHOLDER_PASSWORDS = new Set([
+  "change_me",
+  "change-me",
+  "replace_with_a_password_of_at_least_12_characters",
+]);
 
 function validatePassword(password) {
   if (typeof password !== "string" || password.length < 12) {
@@ -19,6 +24,10 @@ function validatePassword(password) {
 
   if (password.length > 200) {
     throw new Error("Пароль слишком длинный.");
+  }
+
+  if (UNSAFE_PLACEHOLDER_PASSWORDS.has(password.trim().toLowerCase())) {
+    throw new Error("Замените пример пароля на уникальный пароль.");
   }
 }
 
