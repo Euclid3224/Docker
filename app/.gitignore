@@ -3,3 +3,5 @@ node_modules/
 server.stdout.log
 server.stderr.log
 data/users.json
+data/orders.json
+data/*.tmp

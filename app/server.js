@@ -11,10 +11,12 @@ const { hashPassword, verifyPassword, validatePassword } = require("./lib/passwo
 
 const ROOT_DIR = __dirname;
 const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || "127.0.0.1";
 const SESSION_COOKIE = "bakery_admin_session";
 const SESSION_LIFETIME_MS = 8 * 60 * 60 * 1000;
 const LOGIN_WINDOW_MINUTES = 15;
 const LOGIN_ATTEMPT_LIMIT = 5;
+const LOGIN_USERNAME_MAX_LENGTH = 128;
 const ORDER_WINDOW_MINUTES = 15;
 const ORDER_ATTEMPT_LIMIT = 3;
 const EVENT_CLIENT_LIMIT = 100;
@@ -139,6 +141,16 @@ function createBakeryServer(options = {}) {
   }
 
   async function readJsonBody(request) {
+    const contentType = String(request.headers["content-type"] || "")
+      .split(";", 1)[0]
+      .trim()
+      .toLowerCase();
+    if (contentType !== "application/json") {
+      const error = new Error("Для API-запроса требуется Content-Type application/json.");
+      error.statusCode = 415;
+      throw error;
+    }
+
     let size = 0;
     const chunks = [];
 
@@ -336,15 +348,20 @@ function createBakeryServer(options = {}) {
     if (request.method === "POST" && url.pathname === "/api/auth/login") {
       const body = await readJsonBody(request);
       const username = String(body.username || "").trim();
+      if (!username || username.length > LOGIN_USERNAME_MAX_LENGTH) {
+        sendError(response, 400, "Логин должен содержать от 1 до 128 символов.");
+        return true;
+      }
       const usernameNormalized = username.toLowerCase();
       const ipAddress = getClientIp(request);
-      const failedAttempts = await store.countRecentFailedLogins({
+      const reservation = await store.reserveLoginAttempt({
         usernameNormalized,
         ipAddress,
         windowMinutes: LOGIN_WINDOW_MINUTES,
+        limit: LOGIN_ATTEMPT_LIMIT,
       });
 
-      if (failedAttempts >= LOGIN_ATTEMPT_LIMIT) {
+      if (!reservation.allowed) {
         sendError(
           response,
           429,
@@ -359,9 +376,8 @@ function createBakeryServer(options = {}) {
         Boolean(user?.active) &&
         (await verifyPassword(String(body.password || ""), user.passwordHash));
 
-      await store.recordLoginAttempt({
-        usernameNormalized,
-        ipAddress,
+      await store.completeLoginAttempt({
+        attemptId: reservation.attemptId,
         successful: authenticated,
       });
 
@@ -426,11 +442,10 @@ function createBakeryServer(options = {}) {
         return true;
       }
       validatePassword(body.newPassword);
-      await store.updateUserPassword(
+      await store.updateUserPasswordAndDeleteSessions(
         session.userId,
         await hashPassword(body.newPassword)
       );
-      await store.deleteUserSessions(session.userId);
       sendJson(
         response,
         200,
@@ -702,9 +717,9 @@ if (require.main === module) {
   const server = createBakeryServer();
   server.ready
     .then(() => {
-      server.listen(PORT, () => {
-        console.log(`Пекарня запущена: http://localhost:${PORT}`);
-        console.log(`Личный кабинет: http://localhost:${PORT}/admin/`);
+      server.listen(PORT, HOST, () => {
+        console.log(`Пекарня запущена: http://${HOST}:${PORT}`);
+        console.log(`Личный кабинет: http://${HOST}:${PORT}/admin/`);
       });
     })
     .catch((error) => {

@@ -2,12 +2,15 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { spawnSync } = require("node:child_process");
 const fs = require("node:fs/promises");
 const net = require("node:net");
 const os = require("node:os");
 const path = require("node:path");
 const { createBakeryServer, createOrderNumber } = require("../server");
 const { createFileStore } = require("../lib/file-store");
+const { createPostgresStore } = require("../lib/postgres-store");
+const { validatePassword } = require("../lib/password");
 
 const TEST_PASSWORD = "Admin-Test-123!";
 
@@ -56,8 +59,8 @@ async function startTestServer(options = {}) {
 
 async function jsonRequest(url, options = {}) {
   const response = await fetch(url, {
-    headers: { "Content-Type": "application/json", ...options.headers },
     ...options,
+    headers: { "Content-Type": "application/json", ...options.headers },
   });
   const body = await response.json();
   return { response, body };
@@ -220,6 +223,168 @@ test("login failures from other addresses do not lock out the owner", async (con
   assert.equal(owner.response.status, 200);
 });
 
+test("direct clients cannot rotate X-Forwarded-For to bypass login throttling", async (context) => {
+  const app = await startTestServer();
+  context.after(app.close);
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const failed = await jsonRequest(`${app.baseUrl}/api/auth/login`, {
+      method: "POST",
+      headers: { "X-Forwarded-For": `203.0.113.${attempt + 1}` },
+      body: JSON.stringify({ username: "admin", password: "wrong-password" }),
+    });
+    assert.equal(failed.response.status, 401);
+  }
+
+  const blocked = await jsonRequest(`${app.baseUrl}/api/auth/login`, {
+    method: "POST",
+    headers: { "X-Forwarded-For": "198.51.100.10" },
+    body: JSON.stringify({ username: "admin", password: TEST_PASSWORD }),
+  });
+  assert.equal(blocked.response.status, 429);
+});
+
+test("parallel login failures cannot race past the attempt limit", async (context) => {
+  const app = await startTestServer();
+  context.after(app.close);
+
+  const responses = await Promise.all(
+    Array.from({ length: 12 }, () =>
+      login(app.baseUrl, "wrong-password")
+    )
+  );
+  const statusCounts = responses.reduce((counts, { response }) => {
+    counts.set(response.status, (counts.get(response.status) || 0) + 1);
+    return counts;
+  }, new Map());
+
+  assert.equal(statusCounts.get(401), 5);
+  assert.equal(statusCounts.get(429), 7);
+});
+
+test("login rejects oversized usernames without consuming attempt storage", async (context) => {
+  const app = await startTestServer();
+  context.after(app.close);
+
+  const oversized = await jsonRequest(`${app.baseUrl}/api/auth/login`, {
+    method: "POST",
+    body: JSON.stringify({
+      username: "a".repeat(129),
+      password: "wrong-password",
+    }),
+  });
+  assert.equal(oversized.response.status, 400);
+
+  const owner = await login(app.baseUrl);
+  assert.equal(owner.response.status, 200);
+});
+
+test("state-changing JSON endpoints reject simple text/plain requests", async (context) => {
+  const app = await startTestServer();
+  context.after(app.close);
+
+  const response = await fetch(`${app.baseUrl}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ username: "admin", password: TEST_PASSWORD }),
+  });
+  assert.equal(response.status, 415);
+});
+
+test("known example passwords are rejected", () => {
+  assert.throws(
+    () => validatePassword("replace_with_a_password_of_at_least_12_characters"),
+    /уникальный пароль/
+  );
+  assert.doesNotThrow(() => validatePassword(TEST_PASSWORD));
+});
+
+test("PostgreSQL login reservation and password revocation are transactional", async () => {
+  const transactionQueries = [];
+  const poolQueries = [];
+  const client = {
+    async query(sql, parameters = []) {
+      const statement = String(sql).replace(/\s+/g, " ").trim();
+      transactionQueries.push({ statement, parameters });
+
+      if (statement.startsWith("SELECT COUNT(*)")) {
+        return { rows: [{ count: 0 }] };
+      }
+      if (statement.startsWith("INSERT INTO login_attempts")) {
+        return { rows: [{ id: 42 }] };
+      }
+      if (statement.startsWith("UPDATE users")) {
+        return { rowCount: 1, rows: [] };
+      }
+      return { rowCount: 1, rows: [] };
+    },
+    release() {},
+  };
+  const pool = {
+    async connect() {
+      return client;
+    },
+    async query(sql, parameters = []) {
+      poolQueries.push({
+        statement: String(sql).replace(/\s+/g, " ").trim(),
+        parameters,
+      });
+      return { rowCount: 1, rows: [] };
+    },
+    async end() {},
+  };
+  const store = createPostgresStore({ pool });
+
+  const reservation = await store.reserveLoginAttempt({
+    usernameNormalized: "admin",
+    ipAddress: "127.0.0.1",
+    windowMinutes: 15,
+    limit: 5,
+  });
+  assert.deepEqual(reservation, { allowed: true, attemptId: 42 });
+  await store.completeLoginAttempt({ attemptId: 42, successful: true });
+  await store.updateUserPasswordAndDeleteSessions("owner-id", "new-hash");
+
+  assert.equal(
+    transactionQueries.filter(({ statement }) => statement === "BEGIN").length,
+    2
+  );
+  assert.equal(
+    transactionQueries.filter(({ statement }) => statement === "COMMIT").length,
+    2
+  );
+  assert.ok(
+    transactionQueries.some(({ statement }) =>
+      statement.startsWith("SELECT pg_advisory_xact_lock")
+    )
+  );
+  assert.ok(
+    transactionQueries.some(({ statement }) =>
+      statement.startsWith("DELETE FROM sessions")
+    )
+  );
+  assert.ok(
+    poolQueries.some(({ statement }) =>
+      statement.startsWith("UPDATE login_attempts SET successful = TRUE")
+    )
+  );
+});
+
+test("admin password CLI refuses password arguments", () => {
+  const script = path.join(__dirname, "..", "scripts", "set-admin-password.js");
+  const result = spawnSync(
+    process.execPath,
+    [script, "admin", "not-a-real-password"],
+    {
+      encoding: "utf8",
+      env: { ...process.env, DATABASE_URL: "" },
+    }
+  );
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Не передавайте пароль в аргументах/);
+});
+
 test("order numbers derive sufficient entropy from the order id", () => {
   assert.equal(
     createOrderNumber(
@@ -238,6 +403,12 @@ test("frontend keeps public admin links hidden and uses local hero assets", asyn
     catalogScript,
     navigationScript,
     stylesheet,
+    adminScript,
+    composeFile,
+    environmentExample,
+    gitignore,
+    postgresGitignore,
+    backupGitignore,
   ] =
     await Promise.all([
       fs.readFile(path.join(__dirname, "..", "index.html"), "utf8"),
@@ -246,6 +417,12 @@ test("frontend keeps public admin links hidden and uses local hero assets", asyn
       fs.readFile(path.join(__dirname, "..", "catalog.js"), "utf8"),
       fs.readFile(path.join(__dirname, "..", "script.js"), "utf8"),
       fs.readFile(path.join(__dirname, "..", "style.css"), "utf8"),
+      fs.readFile(path.join(__dirname, "..", "admin", "admin.js"), "utf8"),
+      fs.readFile(path.join(__dirname, "..", "compose.app.yaml"), "utf8"),
+      fs.readFile(path.join(__dirname, "..", ".env.example"), "utf8"),
+      fs.readFile(path.join(__dirname, "..", ".gitignore"), "utf8"),
+      fs.readFile(path.join(__dirname, "..", "..", "postgres", ".gitignore"), "utf8"),
+      fs.readFile(path.join(__dirname, "..", "..", "backup", ".gitignore"), "utf8"),
     ]);
 
   assert.match(indexHtml, /loading="lazy"/);
@@ -274,6 +451,18 @@ test("frontend keeps public admin links hidden and uses local hero assets", asyn
   assert.match(stylesheet, /min-height:\s*calc\(100svh - 73px\)/);
   assert.match(stylesheet, /height:\s*100dvh/);
   assert.match(stylesheet, /Persistent cart dock/);
+  assert.match(adminScript, /function clearSensitiveState\(\)/);
+  assert.match(adminScript, /orders = \[\]/);
+  assert.match(composeFile, /127\.0\.0\.1:3000:3000/);
+  assert.match(composeFile, /HOST:\s*0\.0\.0\.0/);
+  assert.match(environmentExample, /^HOST=127\.0\.0\.1$/m);
+  assert.match(environmentExample, /^DATABASE_URL=$/m);
+  assert.match(environmentExample, /^ADMIN_PASSWORD=$/m);
+  assert.match(environmentExample, /^TRUST_PROXY=false$/m);
+  assert.match(gitignore, /^data\/orders\.json$/m);
+  assert.match(postgresGitignore, /^\.env$/m);
+  assert.match(postgresGitignore, /^\*\.sql$/m);
+  assert.match(backupGitignore, /^\*$/m);
 });
 
 test("pickup order reserves stock and cancellation restores it", async (context) => {

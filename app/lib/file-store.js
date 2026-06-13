@@ -275,6 +275,24 @@ function createFileStore(options = {}) {
     });
   }
 
+  async function updateUserPasswordAndDeleteSessions(userId, passwordHash) {
+    return mutate(async () => {
+      const users = await readArray(usersFile);
+      const user = users.find((item) => item.id === userId);
+      if (!user) {
+        return false;
+      }
+      user.passwordHash = passwordHash;
+      await writeArray(usersFile, users);
+      sessions.forEach((session, tokenHash) => {
+        if (session.userId === userId) {
+          sessions.delete(tokenHash);
+        }
+      });
+      return true;
+    });
+  }
+
   async function createSession(session) {
     sessions.set(session.tokenHash, { ...session });
   }
@@ -308,27 +326,53 @@ function createFileStore(options = {}) {
     });
   }
 
-  async function recordLoginAttempt(attempt) {
-    loginAttempts.push({ ...attempt, attemptedAt: Date.now() });
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    while (loginAttempts[0]?.attemptedAt < cutoff) {
-      loginAttempts.shift();
-    }
-  }
-
-  async function countRecentFailedLogins({
+  async function reserveLoginAttempt({
     usernameNormalized,
     ipAddress,
     windowMinutes,
+    limit,
   }) {
-    const cutoff = Date.now() - windowMinutes * 60 * 1000;
-    return loginAttempts.filter(
-      (attempt) =>
-        !attempt.successful &&
-        attempt.attemptedAt > cutoff &&
-        attempt.usernameNormalized === usernameNormalized &&
-        attempt.ipAddress === ipAddress
-    ).length;
+    return mutate(async () => {
+      const now = Date.now();
+      const retentionCutoff = now - 24 * 60 * 60 * 1000;
+      while (loginAttempts[0]?.attemptedAt < retentionCutoff) {
+        loginAttempts.shift();
+      }
+
+      const windowCutoff = now - windowMinutes * 60 * 1000;
+      const failedAttempts = loginAttempts.filter(
+        (attempt) =>
+          !attempt.successful &&
+          attempt.attemptedAt > windowCutoff &&
+          attempt.usernameNormalized === usernameNormalized &&
+          attempt.ipAddress === ipAddress
+      ).length;
+      if (failedAttempts >= limit) {
+        return { allowed: false };
+      }
+
+      const attemptId = crypto.randomUUID();
+      loginAttempts.push({
+        id: attemptId,
+        usernameNormalized,
+        ipAddress,
+        successful: false,
+        attemptedAt: now,
+      });
+      return { allowed: true, attemptId };
+    });
+  }
+
+  async function completeLoginAttempt({ attemptId, successful }) {
+    if (!successful) {
+      return;
+    }
+    await mutate(async () => {
+      const attempt = loginAttempts.find((item) => item.id === attemptId);
+      if (attempt) {
+        attempt.successful = true;
+      }
+    });
   }
 
   async function recordOrderAttempt(attempt) {
@@ -370,12 +414,13 @@ function createFileStore(options = {}) {
     countUsers,
     createUser,
     updateUserPassword,
+    updateUserPasswordAndDeleteSessions,
     createSession,
     getSession,
     deleteSession,
     deleteUserSessions,
-    recordLoginAttempt,
-    countRecentFailedLogins,
+    reserveLoginAttempt,
+    completeLoginAttempt,
     recordOrderAttempt,
     countRecentOrders,
     importLegacyData,

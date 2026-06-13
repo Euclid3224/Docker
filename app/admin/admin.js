@@ -232,9 +232,21 @@
     renderOrders();
   }
 
+  function clearSensitiveState() {
+    orders = [];
+    ordersView = "active";
+    passwordForm.reset();
+    passwordMessage.textContent = "";
+    passwordModal.hidden = true;
+    renderOrders();
+  }
+
   function showAuthenticatedState(authenticated) {
     loginScreen.hidden = authenticated;
     adminApp.hidden = !authenticated;
+    if (!authenticated) {
+      clearSensitiveState();
+    }
   }
 
   function openProductModal(product = null) {
