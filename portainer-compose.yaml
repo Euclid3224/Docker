@@ -49,7 +49,7 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in Portainer}
       COOKIE_SECURE: "true"
-      TRUST_PROXY: "true"
+      TRUST_PROXY: "false"
     expose:
       - "3000"
     ports:
