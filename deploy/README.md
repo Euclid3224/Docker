@@ -76,12 +76,13 @@ nano .env
 openssl rand -hex 32
 ```
 
-Запустите базу и один раз импортируйте товары:
+Запустите Stack. Сервис `migrate` автоматически создаст таблицы и импортирует
+товары только при пустой базе. При обновлениях существующие остатки и заказы не
+перезаписываются.
+
+Для запуска из командной строки:
 
 ```bash
-docker compose up -d postgres
-docker compose build app
-docker compose run --rm app npm run db:migrate
 docker compose up -d --build
 docker compose ps
 docker compose logs --tail=100 app caddy

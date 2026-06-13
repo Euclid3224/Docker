@@ -40,6 +40,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test:
         - CMD
@@ -55,6 +57,24 @@ services:
       timeout: 5s
       retries: 20
       start_period: 15s
+
+  migrate:
+    build:
+      context: ../app
+    restart: "no"
+    command: ["npm", "run", "db:migrate"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://bakery_user:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}@postgres:5432/bakery
+      DATABASE_SSL: "false"
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in deploy/.env}
+      MIGRATE_IF_EMPTY_ONLY: "true"
+    networks:
+      - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   caddy:
     image: caddy:2-alpine
