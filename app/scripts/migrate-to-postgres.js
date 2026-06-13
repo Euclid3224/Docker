@@ -44,7 +44,19 @@ async function main() {
 
   try {
     await store.init();
-    await store.importLegacyData(products, normalizedOrders);
+    const importOnlyIfEmpty = process.env.MIGRATE_IF_EMPTY_ONLY === "true";
+    const databaseHasData =
+      importOnlyIfEmpty &&
+      ((await store.listProducts()).length > 0 ||
+        (await store.listOrders()).length > 0);
+
+    if (!databaseHasData) {
+      await store.importLegacyData(products, normalizedOrders);
+    } else {
+      console.log(
+        "База уже содержит товары или заказы: импорт исходных данных пропущен."
+      );
+    }
 
     if ((await store.countUsers()) === 0) {
       if (!adminPassword) {
