@@ -79,14 +79,17 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
-    environment:
-      SITE_DOMAIN: ${SITE_DOMAIN:?Set SITE_DOMAIN in deploy/.env}
+    command:
+      - reverse-proxy
+      - --from
+      - ${SITE_DOMAIN:?Set SITE_DOMAIN in deploy/.env}
+      - --to
+      - app:3000
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     networks:
