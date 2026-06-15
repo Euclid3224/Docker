@@ -196,3 +196,57 @@ button, input, select, textarea,
     border-radius: 10px;
   }
 }
+
+/* =====================================================================
+   ИКОНКИ КАТЕГОРИЙ: поведение нажатия на мобильных
+   • Убираем синюю подсветку тапа (-webkit-tap-highlight-color).
+   • Запрещаем перетаскивание и долгое нажатие «Сохранить изображение»
+     для иконок (pointer-events / user-drag / touch-callout).
+   • Клик по самой кнопке категории сохраняется (pointer-events:none
+     только на <img>, не на кнопке).
+   • Доступность сохранена: вместо убранного outline — внятный
+     :focus-visible.
+   ===================================================================== */
+
+.menu-category-card,
+.menu-category-card img,
+.catalog-card > img,
+.menu-icon-button,
+.cart-toggle,
+.menu-toggle {
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+}
+
+/* Картинки-иконки: не перетаскиваются, без меню «Сохранить», клики
+   проходят сквозь них на кнопку-родитель */
+.menu-category-card img,
+.menu-icon-button img,
+.cart-toggle img,
+.menu-toggle img,
+.catalog-card > img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Сама кнопка категории остаётся кликабельной и не выделяется текстом */
+.menu-category-card {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  outline: none;
+}
+
+/* Доступность: видимый фокус только для клавиатуры */
+.menu-category-card:focus-visible {
+  outline: 3px solid var(--caramel, #b87538);
+  outline-offset: 2px;
+  border-radius: 14px;
+}
+

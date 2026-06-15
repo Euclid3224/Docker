@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тёплая пекарня | Свежая выпечка каждый день</title>
+  <link rel="preload" as="image" href="assets/hero-bakery.webp" fetchpriority="high">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&display=swap">
+  <link rel="stylesheet" href="style.css?v=20260615-readable-v2">
+  <link rel="stylesheet" href="polish-v2.css?v=20260615-readable-v2">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand-wordmark logo" href="#hero" aria-label="Тёплая пекарня — на главную">
+      <span>Тёплая</span>
+      <strong>пекарня</strong>
+    </a>
+
+    <button class="menu-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="main-nav" id="main-nav" aria-label="Основная навигация">
+      <a href="#about">О нас</a>
+      <a href="menu.html">Меню</a>
+      <a href="#gallery">Галерея</a>
+      <a href="#reviews">Отзывы</a>
+      <a href="#contacts">Контакты</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero-content">
+        <p class="eyebrow">Пекарня рядом с домом</p>
+        <h1>Хлеб, который ждут</h1>
+        <p class="hero-text">Печём небольшими партиями, чтобы хлеб хрустел, выпечка оставалась нежной, а кофе согревал.</p>
+        <a class="button" href="menu.html">Сделать заказ</a>
+      </div>
+      <figure class="hero-media">
+        <img src="assets/hero-bakery.webp" alt="Свежая выпечка на витрине Тёплой пекарни" width="1600" height="1200" fetchpriority="high">
+      </figure>
+    </section>
+
+    <section class="trust-strip" aria-label="Условия заказа">
+      <div class="trust-item">
+        <svg class="trust-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6.5 8.5h11l1 12h-13l1-12Z"></path>
+          <path d="M9 9V6.5a3 3 0 0 1 6 0V9"></path>
+        </svg>
+        <span class="trust-copy"><strong>Самовывоз</strong><span>готовим к вашему времени</span></span>
+      </div>
+      <div class="trust-item">
+        <svg class="trust-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <path d="M3 9h18"></path>
+        </svg>
+        <span class="trust-copy"><strong>Оплата при получении</strong><span>наличными или картой</span></span>
+      </div>
+      <div class="trust-item">
+        <svg class="trust-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 7v5l3 2"></path>
+        </svg>
+        <span class="trust-copy"><strong>08:00–20:00</strong><span>каждый день</span></span>
+      </div>
+    </section>
+
+    <section class="section about-section" id="about">
+      <div class="section-text">
+        <p class="eyebrow">О нас</p>
+        <h2>Печём с заботой и простыми ингредиентами</h2>
+        <p>Мы готовим хлеб, десерты и напитки небольшими партиями, чтобы каждый гость получал свежий вкус. В основе нашей работы — натуральные продукты, спокойная атмосфера и любовь к хорошей выпечке.</p>
+      </div>
+      <div class="about-card">
+        <strong>08:00</strong>
+        <span>первая партия хлеба уже на витрине</span>
+      </div>
+    </section>
+
+    <section class="section" id="gallery">
+      <div class="section-heading">
+        <p class="eyebrow">Галерея</p>
+        <h2>Атмосфера пекарни</h2>
+      </div>
+      <div class="gallery-grid">
+        <img src="assets/atmosphere-1.jpg" alt="Гости у витрины пекарни" width="1280" height="960" loading="lazy" decoding="async">
+        <img src="assets/atmosphere-2.jpg" alt="Рабочий момент за стойкой" width="960" height="1280" loading="lazy" decoding="async">
+        <img src="assets/atmosphere-3.jpg" alt="Уютный зал пекарни" width="960" height="1280" loading="lazy" decoding="async">
+        <img src="assets/atmosphere-4.webp" alt="Свежий хлеб на витрине" width="1280" height="960" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="section reviews-section" id="reviews">
+      <div class="section-heading">
+        <p class="eyebrow">Отзывы</p>
+        <h2>Что говорят гости</h2>
+      </div>
+      <div class="reviews-grid">
+        <blockquote>
+          <p>“Отличное место! Постоянно приобретаем здесь выпечку и остаемся в восторге) Из плюсов: качество и разнообразие продукции великолепное, персонал приветливый и внимательный, всегда готов помочь с выбором, есть место для парковки, а также можно набрать воды в автомате. А минусов не будет) Спасибо за прекрасное обслуживание и вкусную выпечку!”</p>
+          <cite>Ирина</cite>
+        </blockquote>
+        <blockquote>
+          <p>“Всегда свежая, мягкая, воздушная выпечка, очень вкусные булочки, бублики. Цены приятно радуют, а разнообразие продукции впечатляет. В общем, если хотите чего-то сытного или чего-то сладкого, то точно нужно заглянуть.”</p>
+          <cite>Михаил</cite>
+        </blockquote>
+        <blockquote>
+          <p>“Хорошая пекарня! Отличный ассортимент! Превосходное качество продукции! Попробуешь раз — вернёшься снова.”</p>
+          <cite>Дмитрий</cite>
+        </blockquote>
+      </div>
+    </section>
+
+    <section class="section contacts-section" id="contacts">
+      <div>
+        <p class="eyebrow">Контакты</p>
+        <h2>Заглядывайте за свежей выпечкой</h2>
+      </div>
+      <div class="contact-list">
+        <p><strong>Адрес:</strong> Ростовская область, сл. Родионово-Несветайская, ул. Бабичева, 51</p>
+        <p><strong>Телефон:</strong> <a href="tel:+79298167009">+7 (929) 816-70-09</a></p>
+        <p><strong>Часы работы:</strong> ежедневно, 08:00–20:00</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <strong>Тёплая пекарня</strong>
+    <p>© 2026. Свежая выпечка каждый день.</p>
+  </footer>
+
+  
+</body>
+</html>
