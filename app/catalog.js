@@ -9,16 +9,31 @@
     desserts: "Десерты",
     other: "Другое",
   };
+  const PRIMARY_CATEGORY_ORDER = [
+    "all",
+    "bread",
+    "pastry",
+    "desserts",
+    "drinks",
+  ];
 
   const catalog = document.querySelector("[data-product-catalog]");
   const tabs = document.querySelector("[data-category-tabs]");
+  const categoryButtons = document.querySelectorAll(
+    ".menu-category-list [data-category], .catalog-reset-button[data-category]"
+  );
   const emptyState = document.querySelector("[data-empty-state]");
+  const catalogTitle = document.querySelector("[data-catalog-title]");
+  const searchForm = document.querySelector("[data-menu-search]");
+  const searchToggle = document.querySelector("[data-search-toggle]");
+  const searchInput = document.querySelector("[data-product-search]");
+  const searchClear = document.querySelector("[data-search-clear]");
+  const searchStatus = document.querySelector("[data-search-status]");
   const cartDrawer = document.querySelector("[data-cart-drawer]");
   const cartBackdrop = document.querySelector("[data-cart-backdrop]");
   const cartItems = document.querySelector("[data-cart-items]");
   const cartEmpty = document.querySelector("[data-cart-empty]");
   const cartTotal = document.querySelector("[data-cart-total]");
-  const cartToggleTotal = document.querySelector("[data-cart-toggle-total]");
   const cartCount = document.querySelector("[data-cart-count]");
   const checkoutButton = document.querySelector("[data-checkout]");
   const checkoutMessage = document.querySelector("[data-checkout-message]");
@@ -29,12 +44,20 @@
     ".site-header, main, .site-footer"
   );
 
-  if (!catalog || !window.ProductStore || !window.OrderStore) {
+  if (
+    !catalog ||
+    !searchForm ||
+    !searchToggle ||
+    !searchInput ||
+    !window.ProductStore ||
+    !window.OrderStore
+  ) {
     return;
   }
 
   let products = [];
-  let activeCategory = "all";
+  let activeCategory = "pastry";
+  let searchQuery = "";
   let cartReturnFocus = null;
   const CART_STORAGE_KEY = "teply-hleb-cart";
   const cart = new Map();
@@ -73,8 +96,15 @@
   }
 
   function renderTabs() {
-    const productCategories = products.map((product) => product.category);
-    const categories = ["all", ...new Set(productCategories)];
+    const productCategories = [
+      ...new Set(products.map((product) => product.category).filter(Boolean)),
+    ];
+    const categories = [
+      ...PRIMARY_CATEGORY_ORDER,
+      ...productCategories.filter(
+        (category) => !PRIMARY_CATEGORY_ORDER.includes(category)
+      ),
+    ];
 
     if (!categories.includes(activeCategory)) {
       activeCategory = "all";
@@ -94,15 +124,47 @@
         `
       )
       .join("");
+
+    categoryButtons.forEach((button) => {
+      const isActive = button.dataset.category === activeCategory;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
   }
 
   function renderProducts() {
-    const visibleProducts =
-      activeCategory === "all"
+    const normalizedQuery = searchQuery.trim().toLocaleLowerCase("ru-RU");
+    const categoryProducts =
+      normalizedQuery || activeCategory === "all"
         ? products
         : products.filter((product) => product.category === activeCategory);
+    const visibleProducts = normalizedQuery
+      ? categoryProducts.filter((product) => {
+          const searchableText = [
+            product.name,
+            product.description,
+            CATEGORY_LABELS[product.category],
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLocaleLowerCase("ru-RU");
+          return searchableText.includes(normalizedQuery);
+        })
+      : categoryProducts;
+
+    catalogTitle.textContent = normalizedQuery
+      ? "Результаты поиска"
+      : CATEGORY_LABELS[activeCategory] || activeCategory;
+    searchStatus.hidden = !normalizedQuery;
+    if (normalizedQuery) {
+      searchStatus.textContent = `Найдено товаров: ${visibleProducts.length}`;
+    }
+    searchClear.hidden = !normalizedQuery;
 
     emptyState.hidden = visibleProducts.length > 0;
+    emptyState.textContent = normalizedQuery
+      ? "По вашему запросу ничего не найдено."
+      : "В этой категории пока нет товаров.";
     catalog.innerHTML = visibleProducts
       .map((product) => {
         const quantity = cart.get(product.id) || 0;
@@ -213,11 +275,10 @@
 
     cartCount.textContent = String(itemCount);
     cartTotal.textContent = formatPrice(total);
-    cartToggleTotal.textContent = formatPrice(total);
     cartToggle.classList.toggle("has-items", itemCount > 0);
     cartToggle.setAttribute(
       "aria-label",
-      `Открыть корзину. Товаров: ${itemCount}. Сумма: ${formatPrice(total)}.`
+      `Открыть корзину. Товаров: ${itemCount}.`
     );
     saveCart();
     cartEmpty.hidden = lines.length > 0;
@@ -290,6 +351,37 @@
     }
   }
 
+  function selectCategory(category) {
+    searchQuery = "";
+    searchInput.value = "";
+    activeCategory = category;
+    renderTabs();
+    renderProducts();
+    setSearchState(false);
+    document.getElementById("catalog")?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
+  }
+
+  function setSearchState(isOpen, { restoreFocus = false } = {}) {
+    searchForm.hidden = !isOpen;
+    searchForm.inert = !isOpen;
+    searchToggle.setAttribute("aria-expanded", String(isOpen));
+    searchToggle.setAttribute(
+      "aria-label",
+      isOpen ? "Закрыть поиск" : "Открыть поиск"
+    );
+
+    if (isOpen) {
+      searchInput.focus();
+    } else if (restoreFocus) {
+      searchToggle.focus();
+    }
+  }
+
   function changeCartQuantity(productId, change) {
     const product = products.find((item) => item.id === productId);
 
@@ -311,15 +403,40 @@
     renderCart();
   }
 
-  tabs.addEventListener("click", (event) => {
+  function handleCategoryClick(event) {
     const button = event.target.closest("[data-category]");
     if (!button) {
       return;
     }
 
-    activeCategory = button.dataset.category;
+    selectCategory(button.dataset.category);
+  }
+
+  tabs.addEventListener("click", handleCategoryClick);
+  categoryButtons.forEach((button) => {
+    button.addEventListener("click", handleCategoryClick);
+  });
+
+  searchToggle.addEventListener("click", () => {
+    setSearchState(searchForm.hidden);
+  });
+
+  searchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+  });
+
+  searchInput.addEventListener("input", () => {
+    searchQuery = searchInput.value;
     renderTabs();
     renderProducts();
+  });
+
+  searchClear.addEventListener("click", () => {
+    searchInput.value = "";
+    searchQuery = "";
+    renderTabs();
+    renderProducts();
+    searchInput.focus();
   });
 
   catalog.addEventListener("click", (event) => {
@@ -355,6 +472,12 @@
   cartBackdrop.addEventListener("click", closeCart);
 
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !searchForm.hidden) {
+      event.preventDefault();
+      setSearchState(false, { restoreFocus: true });
+      return;
+    }
+
     if (!cartDrawer.classList.contains("is-open")) {
       return;
     }
@@ -439,6 +562,7 @@
 
   async function initialize() {
     catalog.innerHTML = '<p class="loading-state">Загружаем сегодняшнюю витрину...</p>';
+    setSearchState(false);
 
     try {
       products = await window.ProductStore.getAll();
