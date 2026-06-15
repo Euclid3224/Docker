@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Напитки">
+  <rect x="6" y="6" width="84" height="84" rx="24" fill="#f3e9dc"/>
+  <path d="M25 44h42v18c0 9-7 16-16 16H41c-9 0-16-7-16-16V44Z" fill="#68472f"/>
+  <path d="M67 49h3c7 0 10 4 10 9s-4 9-12 9" fill="none" stroke="#68472f" stroke-width="5" stroke-linecap="round"/>
+  <path d="M36 36c-4-5 3-7 0-12M48 36c-4-5 3-7 0-12M60 36c-4-5 3-7 0-12" fill="none" stroke="#68472f" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

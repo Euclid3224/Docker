@@ -4,25 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Меню | Тёплый Хлеб</title>
-  <link rel="preload" as="image" href="assets/bakery-1.jfif" fetchpriority="high">
   <script src="redirect-to-server.js"></script>
-  <link rel="stylesheet" href="style.css?v=20260612-cart-dock-v4">
+  <link rel="stylesheet" href="style.css?v=20260614-menu-redesign-v1">
 </head>
-<body class="menu-body" data-build="20260612-cart-dock-v4">
-  <header class="site-header">
-    <a class="logo" href="index.html#hero" aria-label="Тёплый Хлеб — на главную">
-      <span class="logo-mark" aria-hidden="true">ТХ</span>
-      <span class="logo-copy">
-        <strong>Тёплый Хлеб</strong>
-        <small>пекарня рядом с домом</small>
-      </span>
-    </a>
-
-    <button class="menu-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
-      <span></span>
-      <span></span>
-      <span></span>
+<body class="menu-body menu-app-body" data-build="20260614-menu-redesign-v1">
+  <header class="site-header menu-app-header">
+    <button class="menu-toggle menu-app-menu-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+      <img src="assets/icon-menu.svg" alt="" width="28" height="28" aria-hidden="true">
     </button>
+
+    <a class="menu-wordmark" href="index.html#hero" aria-label="Тёплый Хлеб — на главную">
+      <span>Тёплый</span>
+      <strong>Хлеб</strong>
+    </a>
 
     <nav class="main-nav" id="main-nav" aria-label="Основная навигация">
       <a href="index.html#about">О нас</a>
@@ -30,71 +24,86 @@
       <a href="index.html#gallery">Галерея</a>
       <a href="index.html#contacts">Контакты</a>
     </nav>
+
+    <div class="menu-header-actions">
+      <button
+        class="menu-icon-button"
+        type="button"
+        data-search-toggle
+        aria-controls="menu-search"
+        aria-expanded="false"
+        aria-label="Открыть поиск"
+      >
+        <img src="assets/icon-search.svg" alt="" width="25" height="25" aria-hidden="true">
+      </button>
+      <button
+        class="cart-toggle menu-header-cart"
+        type="button"
+        data-cart-toggle
+        aria-controls="cart-drawer"
+        aria-expanded="false"
+        aria-label="Открыть корзину. Товаров: 0."
+      >
+        <img src="assets/nav-cart.svg" alt="" width="38" height="38" aria-hidden="true">
+        <span class="cart-toggle__count" data-cart-count>0</span>
+      </button>
+    </div>
+
+    <form class="menu-search" id="menu-search" data-menu-search role="search" hidden>
+      <label class="menu-search__field">
+        <img src="assets/icon-search.svg" alt="" width="22" height="22" aria-hidden="true">
+        <span class="visually-hidden">Поиск по меню</span>
+        <input
+          type="search"
+          inputmode="search"
+          autocomplete="off"
+          placeholder="Найти хлеб, выпечку или напиток"
+          data-product-search
+        >
+        <button class="menu-search__clear" type="button" data-search-clear aria-label="Очистить поиск" hidden>
+          <img src="assets/icon-close.svg" alt="" width="16" height="16" aria-hidden="true">
+        </button>
+      </label>
+    </form>
   </header>
 
-  <main class="menu-page">
-    <section class="menu-hero">
-      <div class="hero-content">
-        <p class="eyebrow">Сегодня на витрине</p>
-        <h1>Свежие вкусы на каждый день</h1>
-        <p class="hero-text">Выбирайте хлеб, выпечку, напитки и десерты, которые мы готовим небольшими партиями к утренней и дневной витрине.</p>
-        <a class="button" href="#catalog">Смотреть ассортимент</a>
-      </div>
-    </section>
+  <main class="menu-page menu-app-main">
+    <nav class="menu-category-list" aria-label="Категории меню">
+      <button class="menu-category-card" type="button" data-category="bread" aria-pressed="false">
+        <img src="assets/nav-bread.svg" alt="" width="58" height="58" aria-hidden="true">
+        <span>Хлеб</span>
+      </button>
+      <button class="menu-category-card" type="button" data-category="pastry" aria-pressed="false">
+        <img src="assets/nav-pastry.svg" alt="" width="58" height="58" aria-hidden="true">
+        <span>Выпечка</span>
+      </button>
+      <button class="menu-category-card" type="button" data-category="desserts" aria-pressed="false">
+        <img src="assets/nav-desserts.svg" alt="" width="58" height="58" aria-hidden="true">
+        <span>Десерты</span>
+      </button>
+      <button class="menu-category-card" type="button" data-category="drinks" aria-pressed="false">
+        <img src="assets/nav-drinks.svg" alt="" width="58" height="58" aria-hidden="true">
+        <span>Напитки</span>
+      </button>
+    </nav>
 
-    <section class="trust-strip trust-strip--menu" aria-label="Условия заказа">
-      <div class="trust-item">
-        <svg class="trust-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6.5 8.5h11l1 12h-13l1-12Z"></path>
-          <path d="M9 9V6.5a3 3 0 0 1 6 0V9"></path>
-        </svg>
-        <span class="trust-copy"><strong>Самовывоз</strong><span>готовим к вашему времени</span></span>
-      </div>
-      <div class="trust-item">
-        <svg class="trust-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-          <path d="M3 9h18"></path>
-        </svg>
-        <span class="trust-copy"><strong>Оплата при получении</strong><span>наличными или картой</span></span>
-      </div>
-      <div class="trust-item">
-        <svg class="trust-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="9"></circle>
-          <path d="M12 7v5l3 2"></path>
-        </svg>
-        <span class="trust-copy"><strong>08:00–20:00</strong><span>каждый день</span></span>
-      </div>
-    </section>
-
-    <section class="section menu-catalog" id="catalog" aria-labelledby="menu-title">
+    <section class="menu-catalog" id="catalog" aria-labelledby="menu-title">
       <div class="catalog-heading">
         <div class="section-heading">
-          <p class="eyebrow">Ассортимент</p>
-          <h2 id="menu-title">Что приготовили сегодня</h2>
-          <p class="section-lead">Добавляйте товары в корзину и оформляйте самовывоз за несколько минут.</p>
+          <p class="eyebrow">Сегодня на витрине</p>
+          <h1 id="menu-title" data-catalog-title>Выпечка</h1>
         </div>
+        <button class="catalog-reset-button" type="button" data-category="all">Весь ассортимент</button>
       </div>
 
       <div class="catalog-controls">
         <div class="menu-tabs" role="tablist" aria-label="Категории меню" data-category-tabs></div>
       </div>
+      <p class="menu-search-status" data-search-status aria-live="polite" hidden></p>
       <div class="product-catalog" data-product-catalog></div>
       <p class="empty-state" data-empty-state hidden>В этой категории пока нет товаров.</p>
     </section>
   </main>
-
-  <button
-    class="cart-toggle"
-    type="button"
-    data-cart-toggle
-    aria-controls="cart-drawer"
-    aria-expanded="false"
-    aria-label="Открыть корзину. Товаров: 0. Сумма: 0 рублей."
-  >
-    <span class="cart-toggle__label">Корзина</span>
-    <strong class="cart-toggle__total" data-cart-toggle-total>0 ₽</strong>
-    <span class="cart-toggle__count" data-cart-count>0</span>
-  </button>
 
   <aside class="cart-drawer" id="cart-drawer" data-cart-drawer role="dialog" aria-modal="true" aria-label="Корзина" aria-hidden="true" tabindex="-1" inert>
     <div class="cart-header">
@@ -148,6 +157,6 @@
   <script src="product-store.js"></script>
   <script src="order-store.js"></script>
   <script src="script.js"></script>
-  <script src="catalog.js?v=20260612-cart-dock-v4"></script>
+  <script src="catalog.js?v=20260614-menu-redesign-v1"></script>
 </body>
 </html>
