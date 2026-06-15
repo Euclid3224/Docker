@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Тёплый Хлеб | Пекарня</title>
+  <title>Тёплая пекарня | Свежая выпечка каждый день</title>
   <link rel="preload" as="image" href="assets/hero-bakery.webp" fetchpriority="high">
   <script src="redirect-to-server.js"></script>
-  <link rel="stylesheet" href="style.css?v=20260612-cart-fixed-v3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&display=swap">
+  <link rel="stylesheet" href="style.css?v=20260615-readable-v2">
+  <link rel="stylesheet" href="polish-v2.css?v=20260615-readable-v2">
 </head>
 <body>
   <header class="site-header">
-    <a class="logo" href="#hero" aria-label="Тёплый Хлеб — на главную">
-      <span class="logo-mark" aria-hidden="true">ТХ</span>
-      <span class="logo-copy">
-        <strong>Тёплый Хлеб</strong>
-        <small>пекарня рядом с домом</small>
-      </span>
+    <a class="brand-wordmark logo" href="#hero" aria-label="Тёплая пекарня — на главную">
+      <span>Тёплая</span>
+      <strong>пекарня</strong>
     </a>
 
     <button class="menu-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
@@ -36,11 +37,14 @@
   <main>
     <section class="hero" id="hero">
       <div class="hero-content">
-        <p class="eyebrow">Свежая выпечка каждый день</p>
+        <p class="eyebrow">Пекарня рядом с домом</p>
         <h1>Хлеб, который ждут</h1>
         <p class="hero-text">Печём небольшими партиями, чтобы хлеб хрустел, выпечка оставалась нежной, а кофе согревал.</p>
         <a class="button" href="menu.html">Сделать заказ</a>
       </div>
+      <figure class="hero-media">
+        <img src="assets/hero-bakery.webp" alt="Свежая выпечка на витрине Тёплой пекарни" width="1600" height="1200" fetchpriority="high">
+      </figure>
     </section>
 
     <section class="trust-strip" aria-label="Условия заказа">
@@ -127,7 +131,7 @@
   </main>
 
   <footer class="site-footer">
-    <strong>Тёплый Хлеб</strong>
+    <strong>Тёплая пекарня</strong>
     <p>© 2026. Свежая выпечка каждый день.</p>
   </footer>
 

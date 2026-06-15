@@ -1,0 +1,198 @@
+/* =====================================================================
+   Тёплая пекарня — READABILITY & MENU POLISH (v2, 2026-06-15)
+   Подключается ПОСЛЕ style.css, поэтому при равной специфичности
+   побеждает. Только дополнения, ничего не ломает.
+   • Текст → Nunito Sans (единообразно и читаемо на телефоне; заголовки
+     остаются Cormorant Garamond).
+   • Карточки меню → компактные и аккуратные: без описания, кнопка меньше.
+   • Мобильный вид → опрятные плитки 2 в ряд (были строки во всю ширину)
+     + панель категорий 4 в ряд, липкая, сопровождает прокрутку.
+   ===================================================================== */
+
+:root {
+  --ui-font: "Nunito Sans", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  font-family: var(--ui-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Возвращаем UI-шрифт там, где жёстко стоял Segoe UI */
+button, input, select, textarea,
+.main-nav a, .trust-copy, .trust-copy strong, .trust-copy span,
+.cart-line, .cart-line__info, .cart-total span,
+.menu-search__field input, .menu-search-status,
+.catalog-card__body, .stock-badge, .catalog-price,
+.catalog-reset-button, .tab-button,
+.form-field, .form-field span, .pickup-note, .empty-state,
+.button, .add-to-cart, .text-button {
+  font-family: var(--ui-font);
+}
+
+/* ---------- Карточки меню: компактные, без описания, кнопка меньше ---------- */
+.menu-app-main .catalog-card__body > p { display: none !important; }
+
+.menu-app-main .catalog-card__body {
+  padding: 16px 18px 18px;
+  gap: 0;
+}
+
+.menu-app-main .catalog-card__body h3 { margin: 0 0 4px; }
+
+.menu-app-main .catalog-card__topline { margin-bottom: 14px; }
+
+.menu-app-main .catalog-card > img { height: 188px; }
+
+/* Кнопка «В корзину» — компактная пилюля, прижата к низу карточки */
+.menu-app-main .add-to-cart {
+  width: auto;
+  align-self: flex-start;
+  margin-top: auto;
+  min-height: 42px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.menu-app-main .card-quantity-control {
+  width: 138px;
+  min-height: 44px;
+  margin-top: auto;
+  grid-template-columns: 46px minmax(0, 1fr) 46px;
+}
+
+/* ---------- Мобильный вид: плитки 2 в ряд + липкие категории 4 в ряд ---------- */
+@media (max-width: 760px) {
+  /* Две компактные плитки в ряд (раньше — одна строка во всю ширину) */
+  .menu-app-main .product-catalog {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .menu-app-main .catalog-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-radius: 18px;
+  }
+
+  .menu-app-main .catalog-card > img {
+    width: 100%;
+    height: 116px;
+    min-height: 0;
+    border-radius: 18px 18px 0 0;
+    object-fit: cover;
+    object-position: center 25%;
+  }
+
+  .menu-app-main .catalog-card__body {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    gap: 0;
+    padding: 11px 12px 13px;
+  }
+
+  .menu-app-main .catalog-card__body h3 {
+    grid-row: auto;
+    grid-column: auto;
+    align-self: auto;
+    margin: 0 0 6px;
+    font-family: var(--brand-font);
+    font-size: 1.08rem;
+    line-height: 1.16;
+  }
+
+  .menu-app-main .catalog-card__topline {
+    display: flex;
+    flex-direction: row;
+    grid-row: auto;
+    grid-column: auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 10px;
+    order: 2;
+  }
+
+  .menu-app-main .stock-badge { display: none; }
+
+  .menu-app-main .catalog-price {
+    color: var(--caramel);
+    font-size: 1.06rem;
+  }
+
+  /* Кнопка во всю ширину плитки, текст-метка восстановлен */
+  .menu-app-main .add-to-cart {
+    grid-row: auto;
+    grid-column: auto;
+    width: 100%;
+    min-height: 40px;
+    padding: 0 12px;
+    align-self: auto;
+    justify-self: auto;
+    border-radius: 999px;
+    font-size: 0;
+    order: 3;
+    margin-top: auto;
+  }
+
+  .menu-app-main .add-to-cart::after {
+    content: "В корзину";
+    font-size: 0.86rem;
+    font-weight: 800;
+  }
+
+  .menu-app-main .add-to-cart:disabled::after { content: "Распродано"; }
+
+  .menu-app-main .card-quantity-control {
+    grid-row: auto;
+    grid-column: auto;
+    width: 100%;
+    min-height: 40px;
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    justify-self: auto;
+    border-radius: 999px;
+    order: 3;
+    margin-top: auto;
+  }
+
+  /* Категории: 4 в ряд, липкие, не мешают */
+  .menu-category-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    position: sticky;
+    top: 70px;
+    overflow: visible;
+    margin: 0 0 18px;
+    padding: 8px;
+    border: 1px solid rgba(81, 43, 32, 0.1);
+    border-radius: 16px;
+    background: rgba(255, 250, 243, 0.94);
+    backdrop-filter: blur(18px);
+    scrollbar-width: none;
+  }
+
+  .menu-search-open .menu-category-list { top: 122px; }
+
+  .menu-category-card {
+    width: auto;
+    min-width: 0;
+    min-height: 62px;
+    gap: 3px;
+    padding: 7px 4px;
+    border-radius: 13px;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  .menu-category-card img {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+  }
+}
