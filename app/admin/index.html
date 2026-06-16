@@ -3,18 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Личный кабинет | Тёплый Хлеб</title>
-  <script src="../redirect-to-server.js"></script>
-  <link rel="stylesheet" href="../style.css">
+  <title>Кабинет владельца | Тёплая пекарня</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600;6..12,700;6..12,800&display=swap">
+  <link rel="stylesheet" href="../style.css?v=20260616-cabinet">
+  <link rel="stylesheet" href="../polish-v2.css?v=20260616-cabinet">
+  <link rel="stylesheet" href="admin-polish.css?v=20260616-cabinet">
 </head>
-<body class="admin-body">
+<body class="admin-body" style="font-family: &quot;Nunito Sans&quot;, &quot;Segoe UI&quot;, Arial, sans-serif;">
   <main>
     <section class="login-screen" data-login-screen>
       <form class="login-card" data-login-form>
-        <a class="logo" href="../index.html" aria-label="Тёплый Хлеб — на главную">
-          <span class="logo-mark" aria-hidden="true">ТХ</span>
+        <a class="logo" href="../index.html" aria-label="Тёплая пекарня — на главную">
           <span class="logo-copy">
-            <strong>Тёплый Хлеб</strong>
+            <strong>Тёплая пекарня</strong>
             <small>кабинет владельца</small>
           </span>
         </a>
@@ -38,10 +41,10 @@
 
     <section class="admin-app" data-admin-app hidden>
       <aside class="admin-rail">
-        <a class="logo logo--inverse" href="../index.html" aria-label="Тёплый Хлеб — на главную">
-          <span class="logo-mark" aria-hidden="true">ТХ</span>
+        <a class="logo logo--inverse" href="../index.html" aria-label="Тёплая пекарня — на главную">
+          <span class="logo-mark" aria-hidden="true">ТП</span>
           <span class="logo-copy">
-            <strong>Тёплый Хлеб</strong>
+            <strong>Тёплая пекарня</strong>
             <small>кабинет владельца</small>
           </span>
         </a>
@@ -49,29 +52,30 @@
           <a href="#overview">Обзор</a>
           <a href="#orders">Заказы</a>
           <a href="#products">Товары</a>
+          <a href="history.html">История заказов</a>
         </nav>
         <p class="admin-rail__note">Изменения сразу появляются на публичной витрине.</p>
       </aside>
 
       <div class="admin-workspace">
-      <header class="admin-header">
-        <div>
-          <p class="eyebrow">Рабочее пространство</p>
-          <h1>Кабинет владельца</h1>
-        </div>
-        <div class="admin-header__actions">
-          <a class="button button-light" href="../menu.html">Открыть витрину</a>
-          <button class="button button-light" type="button" data-open-password-modal>Пароль</button>
-          <button class="button button-secondary" type="button" data-logout>Выйти</button>
-        </div>
-      </header>
+        <header class="admin-header">
+          <div>
+            <p class="eyebrow">Рабочее пространство</p>
+            <h1>Кабинет владельца</h1>
+          </div>
+          <div class="admin-header__actions">
+            <a class="button button-light" href="../menu.html">Открыть витрину</a>
+            <button class="button button-light" type="button" data-open-password-modal>Пароль</button>
+            <button class="button button-secondary" type="button" data-logout>Выйти</button>
+          </div>
+        </header>
 
-      <div class="admin-layout">
+        <div class="admin-layout">
         <section class="admin-summary" id="overview">
           <div>
             <p class="eyebrow">Сегодня</p>
             <h1>Товары и остатки</h1>
-            <p>Изменения сохраняются сразу и появляются на витрине без перезагрузки в другой открытой вкладке.</p>
+            <p>Изменения сохраняются сразу и появляются на витрине без перезагрузки.</p>
           </div>
           <div class="summary-cards">
             <article>
@@ -94,16 +98,16 @@
             <div>
               <p class="eyebrow">Самовывоз</p>
               <h2>Заказы покупателей</h2>
-              <p>Покупатель оплачивает заказ наличными или картой при получении в пекарне.</p>
+              <p>Оплата наличными или картой при получении в пекарне.</p>
             </div>
           </div>
           <div class="orders-tabs" role="tablist" aria-label="Разделы заказов">
-            <button class="orders-tab is-active" type="button" data-orders-view="active" aria-pressed="true">
+            <span class="orders-tab is-active">
               Активные <span data-active-orders-count>0</span>
-            </button>
-            <button class="orders-tab" type="button" data-orders-view="history" aria-pressed="false">
-              История заказов <span data-history-orders-count>0</span>
-            </button>
+            </span>
+            <a class="orders-tab" href="history.html">
+              История заказов <span class="orders-tab__arrow" aria-hidden="true">→</span>
+            </a>
           </div>
           <div class="admin-orders" data-admin-orders>
             <p class="loading-state">Загружаем заказы...</p>
@@ -161,10 +165,6 @@
           <input type="number" name="stock" min="0" step="1" required>
         </label>
         <label class="form-field form-field--wide">
-          <span>Описание</span>
-          <textarea name="description" rows="4" maxlength="300" required></textarea>
-        </label>
-        <label class="form-field form-field--wide">
           <span>Ссылка на фото или путь к файлу</span>
           <input type="text" name="image" placeholder="assets/bakery-1.jfif">
         </label>
@@ -218,6 +218,8 @@
   <script src="../product-store.js"></script>
   <script src="../order-store.js"></script>
   <script src="../auth.js"></script>
+  <script src="order-utils.js"></script>
+  <script src="admin-demo.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

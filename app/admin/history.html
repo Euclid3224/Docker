@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>История заказов | Тёплая пекарня</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600;6..12,700;6..12,800&display=swap">
+  <link rel="stylesheet" href="../style.css?v=20260616-cabinet">
+  <link rel="stylesheet" href="../polish-v2.css?v=20260616-cabinet">
+  <link rel="stylesheet" href="admin-polish.css?v=20260616-cabinet">
+</head>
+<body class="admin-body">
+  <header class="history-header">
+    <a class="history-back" href="index.html">
+      <span aria-hidden="true">←</span> Кабинет
+    </a>
+    <div class="history-title">
+      <p class="eyebrow">Кабинет владельца</p>
+      <h1>История заказов</h1>
+      <p>Завершённые и отменённые заказы за текущую неделю · Пн–Вс</p>
+    </div>
+    <div class="history-meta">
+      <span class="history-meta__range" data-week-range>—</span>
+      <span class="history-meta__hint">Хранится одну неделю · <span data-history-total>0</span> заказов</span>
+    </div>
+  </header>
+
+  <main>
+    <section data-history-screen hidden>
+      <div class="history-layout" data-history-list>
+        <p class="loading-state">Загружаем историю...</p>
+      </div>
+    </section>
+
+    <section class="history-gate" data-history-gate hidden>
+      <div class="history-gate__card">
+        <p class="eyebrow">Доступ</p>
+        <h1>История заказов</h1>
+        <p data-gate-text>Войдите в кабинет владельца, чтобы посмотреть историю заказов.</p>
+        <a class="button" href="index.html">Войти в кабинет</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="../order-store.js"></script>
+  <script src="../auth.js"></script>
+  <script src="order-utils.js"></script>
+  <script src="admin-demo.js"></script>
+  <script src="history.js"></script>
+</body>
+</html>

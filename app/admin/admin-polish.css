@@ -1,0 +1,266 @@
+/* =====================================================================
+   Тёплая пекарня — КАБИНЕТ ВЛАДЕЛЬЦА, доводка (2026-06-16)
+   Подключается ПОСЛЕ style.css и polish-v2.css.
+   • Соразмерные заголовки: огромные «Кабинет владельца», «Товары и
+     остатки», «Заказы покупателей», «Ассортимент» уменьшены до
+     спокойного, пропорционального масштаба.
+   • Вкладка «История заказов» — ссылка на отдельную страницу.
+   • Стили страницы истории (группировка по дням, бейджи статусов).
+   ===================================================================== */
+
+/* ---------- Ровные цифры на компьютере (моб. версию НЕ трогаем) ----
+   В базовом style.css всем элементам принудительно задан Cormorant
+   Garamond — у него «старостильные» цифры (3, 4, 5, 7, 9 свисают ниже
+   строки), поэтому числа выглядят «прыгающими». Включаем для чисел
+   строчные табличные цифры: одинаковая высота и ширина — выравненный,
+   спокойный вид. Применяется только на десктопе (≥ 761px); телефон
+   (≤ 760px) остаётся без изменений. */
+@media (min-width: 761px) {
+  .admin-app,
+  .admin-app input,
+  .admin-app select,
+  .history-header,
+  .history-layout {
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "lnum" 1, "tnum" 1;
+  }
+}
+
+/* ---------- Соразмерные заголовки кабинета ---------- */
+.admin-header h1 {
+  font-size: clamp(1.3rem, 2.1vw, 1.65rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.admin-summary h1 {
+  font-size: clamp(1.45rem, 2.6vw, 1.95rem);
+  line-height: 1.08;
+}
+
+.admin-toolbar h2,
+.admin-orders-section h2 {
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  line-height: 1.12;
+}
+
+.summary-cards strong {
+  font-size: clamp(1.5rem, 2.4vw, 1.85rem);
+}
+
+/* Надписи-надзаголовки и пояснения — спокойнее и мельче */
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.admin-header p,
+.admin-summary p,
+.admin-toolbar p {
+  font-size: 0.95rem;
+}
+
+/* Логотип-марка в шапке/сайдбаре: «кабинет владельца» помельче */
+.admin-rail .logo,
+.login-card .logo {
+  font-size: 1.05rem;
+}
+
+.logo small {
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.82;
+}
+
+/* ---------- Карточка товара без описания: компактнее ---------- */
+.admin-product__info {
+  gap: 5px;
+  align-content: center;
+}
+
+.admin-product__info h3 {
+  font-size: 1.12rem;
+  line-height: 1.2;
+}
+
+/* ---------- Вкладки заказов: «История» — это ссылка ---------- */
+.orders-tabs a.orders-tab {
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.orders-tabs a.orders-tab:hover {
+  border-color: var(--caramel);
+  color: var(--caramel);
+  transform: translateY(-1px);
+}
+
+.orders-tab__arrow {
+  margin-left: 2px;
+  font-weight: 900;
+}
+
+/* ---------- Шапка страницы истории ---------- */
+.history-header {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 14px clamp(20px, 5vw, 72px);
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 248, 239, 0.92);
+  backdrop-filter: blur(16px);
+}
+
+.history-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--cocoa);
+}
+
+.history-back:hover {
+  color: var(--caramel);
+}
+
+.history-title h1 {
+  font-size: clamp(1.4rem, 2.6vw, 1.95rem);
+  line-height: 1.05;
+  color: var(--cocoa);
+  text-shadow: none;
+}
+
+.history-title p {
+  margin: 4px 0 0;
+  color: rgba(39, 24, 18, 0.62);
+  font-size: 0.9rem;
+}
+
+.history-meta {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  text-align: right;
+}
+
+.history-meta__range {
+  font-weight: 800;
+  color: var(--caramel);
+}
+
+.history-meta__hint {
+  font-size: 0.8rem;
+  color: rgba(39, 24, 18, 0.55);
+}
+
+.history-layout {
+  display: grid;
+  gap: 30px;
+  padding: clamp(28px, 5vw, 56px) clamp(20px, 5vw, 72px);
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+/* ---------- Группа заказов за один день ---------- */
+.history-day {
+  display: grid;
+  gap: 16px;
+}
+
+.history-day__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.history-day__head h2 {
+  font-size: clamp(1.1rem, 1.9vw, 1.4rem);
+  color: var(--cocoa);
+}
+
+.history-day__head h2::first-letter {
+  text-transform: uppercase;
+}
+
+.history-day__head span {
+  color: rgba(39, 24, 18, 0.62);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.history-day__head strong {
+  color: var(--leaf);
+}
+
+/* ---------- Бейдж статуса (история — только чтение) ---------- */
+.order-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 4px 13px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.order-badge--completed {
+  background: rgba(111, 127, 77, 0.16);
+  color: var(--leaf);
+}
+
+.order-badge--cancelled {
+  background: rgba(155, 53, 39, 0.12);
+  color: #9b3527;
+}
+
+/* ---------- Экран-заглушка (нет авторизации/сервера) ---------- */
+.history-gate {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+.history-gate__card {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 440px);
+  padding: clamp(28px, 5vw, 44px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.history-gate__card h1 {
+  font-size: 1.5rem;
+  color: var(--cocoa);
+  text-shadow: none;
+}
+
+.history-gate__card p {
+  margin: 0;
+  color: rgba(39, 24, 18, 0.7);
+}
+
+.history-gate__card .button {
+  justify-self: center;
+}
+
+@media (max-width: 640px) {
+  .history-meta {
+    justify-items: start;
+    text-align: left;
+  }
+}

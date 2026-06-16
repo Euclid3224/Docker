@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  const U = window.OrderUtils;
+
   const loginScreen = document.querySelector("[data-login-screen]");
   const loginForm = document.querySelector("[data-login-form]");
   const loginMessage = document.querySelector("[data-login-message]");
@@ -8,8 +10,6 @@
   const productsContainer = document.querySelector("[data-admin-products]");
   const ordersContainer = document.querySelector("[data-admin-orders]");
   const activeOrdersCount = document.querySelector("[data-active-orders-count]");
-  const historyOrdersCount = document.querySelector("[data-history-orders-count]");
-  const orderTabs = document.querySelectorAll("[data-orders-view]");
   const adminMessage = document.querySelector("[data-admin-message]");
   const modal = document.querySelector("[data-product-modal]");
   const passwordModal = document.querySelector("[data-password-modal]");
@@ -21,16 +21,8 @@
 
   let products = [];
   let orders = [];
-  let ordersView = "active";
   let uploadedImage = "";
   let draggedProductId = null;
-
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("ru-RU", {
-      style: "currency",
-      currency: "RUB",
-      maximumFractionDigits: 0,
-    }).format(price);
 
   const escapeHtml = (value) => {
     const element = document.createElement("div");
@@ -46,17 +38,10 @@
     cancelled: "Отменён",
   };
 
-  const formatDateTime = (value) =>
-    new Intl.DateTimeFormat("ru-RU", {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(new Date(value));
-
   function resolveAdminImage(image) {
-    if (/^(data:|https?:|\/)/.test(image)) {
+    if (/^(data:|https?:|\.\.\/|\/)/.test(image)) {
       return image;
     }
-
     return `../${image}`;
   }
 
@@ -79,47 +64,24 @@
     updateSummary();
 
     if (products.length === 0) {
-      productsContainer.innerHTML = '<p class="empty-state">Товаров пока нет. Добавьте первую позицию.</p>';
+      productsContainer.innerHTML =
+        '<p class="empty-state">Товаров пока нет. Добавьте первую позицию.</p>';
       return;
     }
 
     productsContainer.innerHTML = products
       .map(
         (product, index) => `
-          <article
-            class="admin-product"
-            data-product-id="${escapeHtml(product.id)}"
-            draggable="true"
-          >
+          <article class="admin-product" data-product-id="${escapeHtml(product.id)}" draggable="true">
             <div class="admin-product__reorder" aria-label="Изменить позицию товара">
-              <button
-                class="reorder-button drag-handle"
-                type="button"
-                title="Перетащить товар"
-                aria-label="Перетащить товар"
-              >⋮⋮</button>
-              <button
-                class="reorder-button"
-                type="button"
-                data-move-product="up"
-                aria-label="Поднять товар"
-                ${index === 0 ? "disabled" : ""}
-              >↑</button>
-              <button
-                class="reorder-button"
-                type="button"
-                data-move-product="down"
-                aria-label="Опустить товар"
-                ${index === products.length - 1 ? "disabled" : ""}
-              >↓</button>
+              <button class="reorder-button drag-handle" type="button" title="Перетащить товар" aria-label="Перетащить товар">⋮⋮</button>
+              <button class="reorder-button" type="button" data-move-product="up" aria-label="Поднять товар" ${index === 0 ? "disabled" : ""}>↑</button>
+              <button class="reorder-button" type="button" data-move-product="down" aria-label="Опустить товар" ${index === products.length - 1 ? "disabled" : ""}>↓</button>
             </div>
             <img src="${escapeHtml(resolveAdminImage(product.image))}" alt="${escapeHtml(product.name)}" width="96" height="96" loading="lazy" decoding="async">
             <div class="admin-product__info">
-              <div>
-                <h3>${escapeHtml(product.name)}</h3>
-                <p>${escapeHtml(product.description)}</p>
-              </div>
-              <span>${formatPrice(product.price)} · ${product.stock > 0 ? `${product.stock} шт.` : "нет в наличии"}</span>
+              <h3>${escapeHtml(product.name)}</h3>
+              <span>${U.formatPrice(product.price)} · ${product.stock > 0 ? `${product.stock} шт.` : "нет в наличии"}</span>
             </div>
             <label class="compact-field">
               <span>Цена, ₽</span>
@@ -144,28 +106,17 @@
     const activeOrders = orders.filter(
       (order) => order.status !== "completed" && order.status !== "cancelled"
     );
-    const historyOrders = orders.filter(
-      (order) => order.status === "completed" || order.status === "cancelled"
-    );
-    const visibleOrders = ordersView === "history" ? historyOrders : activeOrders;
-
     activeOrdersCount.textContent = String(activeOrders.length);
-    historyOrdersCount.textContent = String(historyOrders.length);
-    orderTabs.forEach((tab) => {
-      const isActive = tab.dataset.ordersView === ordersView;
-      tab.classList.toggle("is-active", isActive);
-      tab.setAttribute("aria-pressed", String(isActive));
-    });
 
-    if (visibleOrders.length === 0) {
+    if (activeOrders.length === 0) {
       ordersContainer.innerHTML =
-        ordersView === "history"
-          ? '<p class="empty-state">История заказов пока пуста.</p>'
-          : '<p class="empty-state">Активных заказов пока нет. Новые заказы появятся здесь автоматически.</p>';
+        '<p class="empty-state">Активных заказов пока нет. Новые заказы появятся здесь автоматически.</p>';
       return;
     }
 
-    ordersContainer.innerHTML = visibleOrders
+    const numbers = U.assignDailyNumbers(orders);
+
+    ordersContainer.innerHTML = activeOrders
       .map((order) => {
         const statusOptions = Object.entries(ORDER_STATUS_LABELS)
           .map(
@@ -176,45 +127,34 @@
         const items = order.items
           .map(
             (item) =>
-              `<li><span>${escapeHtml(item.name)} × ${item.quantity}</span><strong>${formatPrice(
+              `<li><span>${escapeHtml(item.name)} × ${item.quantity}</span><strong>${U.formatPrice(
                 item.price * item.quantity
               )}</strong></li>`
           )
           .join("");
-        const isFinal = order.status === "completed" || order.status === "cancelled";
 
         return `
           <article class="admin-order status-${escapeHtml(order.status)}" data-order-id="${escapeHtml(order.id)}">
             <div class="admin-order__header">
               <div>
-                <span class="order-number">${escapeHtml(order.number)}</span>
-                <time datetime="${escapeHtml(order.createdAt)}">${formatDateTime(order.createdAt)}</time>
+                <span class="order-number">Заказ № ${escapeHtml(numbers.get(order.id) || "—")}</span>
+                <time datetime="${escapeHtml(order.createdAt)}">${U.formatDateTime(order.createdAt)}</time>
               </div>
               <label class="order-status">
                 <span>Статус</span>
-                <select data-order-status ${isFinal ? "disabled" : ""}>
-                  ${statusOptions}
-                </select>
+                <select data-order-status>${statusOptions}</select>
               </label>
             </div>
             <div class="admin-order__customer">
               <strong>${escapeHtml(order.customer.name)}</strong>
               <a href="tel:${escapeHtml(order.customer.phone)}">${escapeHtml(order.customer.phone)}</a>
-              ${
-                order.customer.pickupTime
-                  ? `<span>Заберёт: ${escapeHtml(order.customer.pickupTime)}</span>`
-                  : ""
-              }
-              ${
-                order.customer.comment
-                  ? `<p>Комментарий: ${escapeHtml(order.customer.comment)}</p>`
-                  : ""
-              }
+              ${order.customer.pickupTime ? `<span>Заберёт: ${escapeHtml(order.customer.pickupTime)}</span>` : ""}
+              ${order.customer.comment ? `<p>Комментарий: ${escapeHtml(order.customer.comment)}</p>` : ""}
             </div>
             <ul class="admin-order__items">${items}</ul>
             <div class="admin-order__total">
               <span>${order.itemCount} шт.</span>
-              <strong>${formatPrice(order.total)}</strong>
+              <strong>${U.formatPrice(order.total)}</strong>
             </div>
           </article>
         `;
@@ -232,21 +172,9 @@
     renderOrders();
   }
 
-  function clearSensitiveState() {
-    orders = [];
-    ordersView = "active";
-    passwordForm.reset();
-    passwordMessage.textContent = "";
-    passwordModal.hidden = true;
-    renderOrders();
-  }
-
   function showAuthenticatedState(authenticated) {
     loginScreen.hidden = authenticated;
     adminApp.hidden = !authenticated;
-    if (!authenticated) {
-      clearSensitiveState();
-    }
   }
 
   function openProductModal(product = null) {
@@ -258,7 +186,6 @@
     productForm.elements.category.value = product?.category || "bread";
     productForm.elements.price.value = product?.price ?? 0;
     productForm.elements.stock.value = product?.stock ?? 0;
-    productForm.elements.description.value = product?.description || "";
     productForm.elements.image.value = product?.image || "assets/bakery-1.jfif";
     formTitle.textContent = product ? "Редактировать товар" : "Новый товар";
     modal.hidden = false;
@@ -359,9 +286,7 @@
 
   productsContainer.addEventListener("click", async (event) => {
     const productElement = event.target.closest("[data-product-id]");
-    if (!productElement) {
-      return;
-    }
+    if (!productElement) return;
 
     const productId = productElement.dataset.productId;
     const actionButton = event.target.closest("button");
@@ -371,10 +296,7 @@
       const currentIndex = products.findIndex((product) => product.id === productId);
       const offset = moveButton.dataset.moveProduct === "up" ? -1 : 1;
       const nextIndex = currentIndex + offset;
-
-      if (currentIndex < 0 || nextIndex < 0 || nextIndex >= products.length) {
-        return;
-      }
+      if (currentIndex < 0 || nextIndex < 0 || nextIndex >= products.length) return;
 
       const productIds = products.map((product) => product.id);
       [productIds[currentIndex], productIds[nextIndex]] = [
@@ -413,9 +335,7 @@
 
     if (event.target.closest("[data-edit-product]")) {
       const product = products.find((item) => item.id === productId);
-      if (product) {
-        openProductModal(product);
-      }
+      if (product) openProductModal(product);
       return;
     }
 
@@ -439,33 +359,29 @@
   ordersContainer.addEventListener("change", async (event) => {
     const select = event.target.closest("[data-order-status]");
     const orderElement = event.target.closest("[data-order-id]");
-
-    if (!select || !orderElement) {
-      return;
-    }
+    if (!select || !orderElement) return;
 
     const order = orders.find((item) => item.id === orderElement.dataset.orderId);
     const previousStatus = order?.status;
     const nextStatus = select.value;
+    if (!order || previousStatus === nextStatus) return;
 
-    if (!order || previousStatus === nextStatus) {
-      return;
-    }
+    const numbers = U.assignDailyNumbers(orders);
+    const label = numbers.get(order.id) || "—";
 
     if (
       nextStatus === "cancelled" &&
-      !window.confirm(`Отменить заказ ${order.number} и вернуть товары в остатки?`)
+      !window.confirm(`Отменить заказ № ${label} и вернуть товары в остатки?`)
     ) {
       select.value = previousStatus;
       return;
     }
 
     select.disabled = true;
-
     try {
       await window.OrderStore.updateStatus(order.id, nextStatus);
       await Promise.all([loadOrders(), loadProducts()]);
-      showAdminMessage(`Статус заказа ${order.number} обновлён.`);
+      showAdminMessage(`Статус заказа № ${label} обновлён.`);
     } catch (error) {
       select.value = previousStatus;
       select.disabled = false;
@@ -473,19 +389,9 @@
     }
   });
 
-  orderTabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      ordersView = tab.dataset.ordersView;
-      renderOrders();
-    });
-  });
-
   productsContainer.addEventListener("dragstart", (event) => {
     const productElement = event.target.closest("[data-product-id]");
-
-    if (!productElement) {
-      return;
-    }
+    if (!productElement) return;
 
     draggedProductId = productElement.dataset.productId;
     productElement.classList.add("is-dragging");
@@ -495,10 +401,7 @@
 
   productsContainer.addEventListener("dragover", (event) => {
     const targetElement = event.target.closest("[data-product-id]");
-
-    if (!targetElement || targetElement.dataset.productId === draggedProductId) {
-      return;
-    }
+    if (!targetElement || targetElement.dataset.productId === draggedProductId) return;
 
     event.preventDefault();
     const bounds = targetElement.getBoundingClientRect();
@@ -514,10 +417,7 @@
 
   productsContainer.addEventListener("drop", async (event) => {
     const targetElement = event.target.closest("[data-product-id]");
-
-    if (!targetElement || !draggedProductId) {
-      return;
-    }
+    if (!targetElement || !draggedProductId) return;
 
     event.preventDefault();
     const targetId = targetElement.dataset.productId;
@@ -527,11 +427,7 @@
       .map((product) => product.id)
       .filter((productId) => productId !== draggedProductId);
     let targetIndex = productIds.indexOf(targetId);
-
-    if (insertAfter) {
-      targetIndex += 1;
-    }
-
+    if (insertAfter) targetIndex += 1;
     productIds.splice(targetIndex, 0, draggedProductId);
 
     try {
@@ -548,29 +444,22 @@
     productsContainer
       .querySelectorAll(".is-dragging, .is-drag-over-before, .is-drag-over-after")
       .forEach((element) => {
-        element.classList.remove(
-          "is-dragging",
-          "is-drag-over-before",
-          "is-drag-over-after"
-        );
+        element.classList.remove("is-dragging", "is-drag-over-before", "is-drag-over-after");
       });
   });
 
   productForm.elements.imageFile.addEventListener("change", (event) => {
     const [file] = event.target.files;
-
     if (!file) {
       uploadedImage = "";
       return;
     }
-
     if (file.size > 1024 * 1024) {
       productFormMessage.textContent = "Фото больше 1 МБ. Выберите файл меньшего размера.";
       productFormMessage.className = "form-message form-field--wide is-error";
       event.target.value = "";
       return;
     }
-
     const reader = new FileReader();
     reader.addEventListener("load", () => {
       uploadedImage = String(reader.result);
@@ -585,12 +474,15 @@
     const submitButton = productForm.querySelector('[type="submit"]');
     const formData = new FormData(productForm);
     const existingId = String(formData.get("id") || "");
+    const name = String(formData.get("name"));
     const product = {
-      name: String(formData.get("name")),
+      name,
       category: String(formData.get("category")),
       price: Number(formData.get("price")),
       stock: Number(formData.get("stock")),
-      description: String(formData.get("description")),
+      // Описание скрыто из кабинета — сервер требует непустое поле,
+      // поэтому подставляем название товара.
+      description: name,
       image: uploadedImage || String(formData.get("image") || "assets/bakery-1.jfif"),
     };
     submitButton.disabled = true;
@@ -603,7 +495,6 @@
         await window.ProductStore.create(product);
         showAdminMessage("Новый товар добавлен.");
       }
-
       products = window.ProductStore.getCached();
       renderProducts();
       closeProductModal();
@@ -617,9 +508,7 @@
 
   window.ProductStore.subscribe((nextProducts) => {
     products = nextProducts;
-    if (!adminApp.hidden) {
-      renderProducts();
-    }
+    if (!adminApp.hidden) renderProducts();
   });
 
   window.OrderStore.subscribe(() => {
@@ -640,13 +529,13 @@
     try {
       const session = await window.AdminAuth.getSession();
       showAuthenticatedState(session.authenticated);
-
       if (session.authenticated) {
         await Promise.all([loadProducts(), loadOrders()]);
       }
     } catch (error) {
       showAuthenticatedState(false);
-      loginMessage.textContent = "Сервер недоступен. Запустите проект командой node server.js.";
+      loginMessage.textContent =
+        "Сервер недоступен. Запустите проект командой node server.js.";
       loginMessage.className = "form-message is-error";
     }
   }
