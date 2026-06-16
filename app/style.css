@@ -18,6 +18,45 @@
   box-sizing: border-box;
 }
 
+/* Mobile tap polish: kill the blue tap highlight + long-press image/icon callout */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+.menu-toggle,
+[role="button"],
+svg,
+img {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+svg,
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* keep clicks working where an image/icon is meant to be interactive */
+a img,
+button img,
+a svg,
+button svg,
+[role="button"] svg,
+[role="button"] img {
+  pointer-events: auto;
+}
+
 [hidden] {
   display: none !important;
 }

@@ -250,3 +250,47 @@ button, input, select, textarea,
   border-radius: 14px;
 }
 
+/* =====================================================================
+   КОРИЧНЕВАЯ ПОЛОСА под блоком «время работы»
+   У блока «О нас» сверху была декоративная карамельная чёрточка
+   (.about-section::before). На телефоне она оказывалась прямо под
+   строкой времени работы и читалась как лишняя полоса. Убираем.
+   ===================================================================== */
+.about-section::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* =====================================================================
+   ЗАГОЛОВКИ НА ТЕЛЕФОНЕ: аккуратный перенос
+   Крупные засечные заголовки рвали длинные слова посередине
+   («ингредиента-ми», «Заглядывайт-е»). Уменьшаем размер, чтобы слова
+   помещались, и запрещаем переносы внутри слова.
+   ===================================================================== */
+@media (max-width: 760px) {
+  .section-heading h2,
+  .section-text h2,
+  .contacts-section h2,
+  .hero h1,
+  .menu-hero h1 {
+    font-size: clamp(1.95rem, 8.4vw, 2.6rem);
+    line-height: 1.12;
+    hyphens: none;
+    -webkit-hyphens: none;
+    overflow-wrap: break-word;
+    word-break: normal;
+    text-wrap: balance;
+  }
+}
+
+@media (max-width: 380px) {
+  .section-heading h2,
+  .section-text h2,
+  .contacts-section h2,
+  .hero h1,
+  .menu-hero h1 {
+    font-size: clamp(1.7rem, 8vw, 2.2rem);
+  }
+}
+
+
