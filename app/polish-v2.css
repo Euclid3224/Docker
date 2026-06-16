@@ -63,6 +63,31 @@ button, input, select, textarea,
   grid-template-columns: 46px minmax(0, 1fr) 46px;
 }
 
+/* ---------- Центрирование названия и цены в карточках меню ---------- */
+.menu-app-main .catalog-card__body {
+  align-items: center;
+  text-align: center;
+}
+
+.menu-app-main .catalog-card__body h3 {
+  text-align: center;
+}
+
+/* Цена и наличие — по центру строки */
+.menu-app-main .catalog-card__topline {
+  justify-content: center;
+}
+
+/* Кнопка / счётчик — тоже по центру, чтобы карточка выглядела цельно */
+.menu-app-main .add-to-cart {
+  align-self: center;
+}
+
+.menu-app-main .card-quantity-control {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ---------- Мобильный вид: плитки 2 в ряд + липкие категории 4 в ряд ---------- */
 @media (max-width: 760px) {
   /* Две компактные плитки в ряд (раньше — одна строка во всю ширину) */
@@ -112,7 +137,7 @@ button, input, select, textarea,
     grid-row: auto;
     grid-column: auto;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 8px;
     margin: 0 0 10px;
     order: 2;
